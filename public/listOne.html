@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Campaign Details Lookup - Online Donation Management System</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Top Navigation Bar -->
+  <nav class="navbar">
+    <div class="nav-container">
+      <a href="index.html" class="brand">
+        <div class="brand-icon">❤️</div>
+        <div class="brand-text">
+          <h1>Online Donation</h1>
+          <span>Management System</span>
+        </div>
+      </a>
+      <div class="nav-links">
+        <a href="index.html" class="nav-link">🏠 Dashboard</a>
+        <a href="list.html" class="nav-link">📋 Campaigns</a>
+        <a href="listOne.html" class="nav-link active">🔍 Lookup</a>
+        <a href="insert.html" class="nav-link">➕ Create / Donate</a>
+        <a href="update.html" class="nav-link">✏️ Update</a>
+        <a href="delete.html" class="nav-link">🗑️ Delete</a>
+        <a href="history.html" class="nav-link">📜 History</a>
+        <a href="admin.html" class="nav-link">📊 Admin Monitor</a>
+        <span class="nav-badge"><span class="pulse-dot"></span> MySQL Active</span>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content Wrapper -->
+  <main class="main-wrapper">
+
+    <!-- SECTION 1: Hero Card with Image -->
+    <section class="hero-card">
+      <div class="hero-content">
+        <div class="hero-tag">🔍 Single Record Query • GET /campaigns/:id</div>
+        <h2 class="hero-title">Campaign <span class="highlight">Details & Progress</span></h2>
+        <p class="hero-subtitle">
+          Query individualized fundraising campaigns by Campaign ID or dropdown selector. Inspect target breakdowns, donor participation history, timeline milestones, and access direct management actions.
+        </p>
+        <div class="btn-group" style="margin-top: 0.5rem;">
+          <a href="list.html" class="btn btn-secondary">📋 View Full Directory</a>
+          <a href="insert.html?tab=org" class="btn btn-primary">➕ Launch New Campaign</a>
+        </div>
+      </div>
+      <div class="hero-image-box">
+        <img src="images/lookup_profile.jpg" 
+             alt="Campaign Inspection" 
+             class="hero-image"
+             onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?auto=format&fit=crop&w=1200&q=80';">
+        <div class="hero-image-overlay"></div>
+      </div>
+    </section>
+
+    <!-- SECTION 2: Search Box Section -->
+    <section class="form-with-image-grid" style="margin-bottom: 2.5rem;">
+      <div class="form-card" style="margin-bottom: 0;">
+        <div class="form-header">
+          <h2>🔍 Search Campaign Records</h2>
+          <p>Choose a registered campaign from the dropdown or enter its Campaign ID manually.</p>
+        </div>
+
+        <!-- Option 1: Dropdown Selection -->
+        <div class="form-group" style="margin-bottom: 0.5rem;">
+          <label class="form-label" for="campaignSelect">
+            📋 Quick Select Registered Campaign:
+          </label>
+          <div class="input-container">
+            <span class="input-icon">🎯</span>
+            <select id="campaignSelect" class="form-input" onchange="onSelectCampaign(this.value)">
+              <option value="">-- Loading campaigns from database... --</option>
+            </select>
+          </div>
+          <span class="form-helper">💡 Pick any campaign to instantly load its live target metrics and donor ledger.</span>
+        </div>
+
+        <div class="search-divider">OR SEARCH BY CAMPAIGN ID</div>
+
+        <!-- Option 2: Manual Numeric ID Input -->
+        <div style="display: flex; gap: 1rem; flex-wrap: wrap; align-items: flex-end;">
+          <div style="flex: 1; min-width: 200px;">
+            <label class="form-label" for="campaignIdInput">Campaign ID Number:</label>
+            <div class="input-container">
+              <span class="input-icon">🔢</span>
+              <input type="number" 
+                     id="campaignIdInput" 
+                     class="form-input" 
+                     placeholder="e.g. 1" 
+                     onkeypress="if(event.key === 'Enter') searchCampaign();">
+            </div>
+          </div>
+          <button onclick="searchCampaign()" class="btn btn-primary" style="height: 48px;">
+            🔍 Search Record
+          </button>
+        </div>
+      </div>
+
+      <!-- Side Card with Section Image -->
+      <div class="form-side-card">
+        <img src="images/hero_gym.jpg" 
+             alt="Fundraising Metrics" 
+             class="form-side-image"
+             onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1532629345422-7515f3d16bb9?auto=format&fit=crop&w=1200&q=80';">
+        <div class="form-side-content">
+          <h4>Single Record Query Flow</h4>
+          <p>Fetches the campaign file directly from MySQL table <code>campaigns</code> along with relational records from table <code>donations</code>.</p>
+          <ul class="form-side-list">
+            <li><span>✔️</span> Real-time raised funds calculation</li>
+            <li><span>✔️</span> Complete donor participation audit</li>
+            <li><span>✔️</span> Direct update and deletion routes</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 3: Campaign Details Result Display Card -->
+    <div id="resultContainer" style="display: none; margin-bottom: 3.5rem;"></div>
+
+  </main>
+
+  <!-- Notification Toast Container -->
+  <div class="toast-box" id="toastBox"></div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <div><strong>Online Donation Management</strong> • READ ONE Operation (<code>GET /campaigns/:id</code>)</div>
+      <div>Relational Tables: <code>campaigns</code> + <code>donations</code></div>
+    </div>
+  </footer>
+
+  <script>
+    function formatCurrency(amount) {
+      return new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD',
+        maximumFractionDigits: 0
+      }).format(Number(amount) || 0);
+    }
+
+    function showToast(message, type = 'info') {
+      const box = document.getElementById('toastBox');
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      toast.innerText = message;
+      box.appendChild(toast);
+      setTimeout(() => toast.remove(), 3500);
+    }
+
+    // Populate dropdown with all campaigns
+    function populateDropdown() {
+      fetch('/campaigns')
+        .then(res => res.json())
+        .then(list => {
+          const select = document.getElementById('campaignSelect');
+          if (!Array.isArray(list) || list.length === 0) {
+            select.innerHTML = '<option value="">-- No campaigns found in database --</option>';
+            return;
+          }
+
+          select.innerHTML = '<option value="">-- Choose a campaign to inspect --</option>' +
+            list.map(c => `
+              <option value="${c.campaign_id}">#${c.campaign_id} - ${c.title} (${c.category || 'General'})</option>
+            `).join('');
+
+          // If query param ?id=X exists, automatically select and load
+          const urlParams = new URLSearchParams(window.location.search);
+          const paramId = urlParams.get('id');
+          if (paramId) {
+            select.value = paramId;
+            document.getElementById('campaignIdInput').value = paramId;
+            fetchCampaignDetails(paramId);
+          }
+        })
+        .catch(err => {
+          console.error("Dropdown error:", err);
+        });
+    }
+
+    function onSelectCampaign(id) {
+      if (!id) return;
+      document.getElementById('campaignIdInput').value = id;
+      fetchCampaignDetails(id);
+    }
+
+    function searchCampaign() {
+      const id = document.getElementById('campaignIdInput').value.trim();
+      if (!id) {
+        showToast('Please enter a Campaign ID Number', 'error');
+        return;
+      }
+      fetchCampaignDetails(id);
+    }
+
+    function fetchCampaignDetails(id) {
+      const container = document.getElementById('resultContainer');
+      container.style.display = 'block';
+      container.innerHTML = `
+        <div class="form-card" style="text-align: center; padding: 3rem;">
+          <p style="color: var(--text-muted); font-size: 1.1rem;">⏳ Fetching campaign records from MySQL...</p>
+        </div>
+      `;
+
+      fetch(`/campaigns/${id}`)
+        .then(res => {
+          if (!res.ok) throw new Error("Campaign record not found in database.");
+          return res.json();
+        })
+        .then(c => {
+          renderCampaignProfile(c);
+        })
+        .catch(err => {
+          container.innerHTML = `
+            <div class="form-card" style="text-align: center; border-left: 4px solid var(--accent-rose); padding: 2.5rem;">
+              <h3 style="color: var(--accent-rose); margin-bottom: 0.5rem;">⚠️ Record Lookup Failed</h3>
+              <p style="color: var(--text-muted);">${err.message}</p>
+            </div>
+          `;
+        });
+    }
+
+    function renderCampaignProfile(c) {
+      const container = document.getElementById('resultContainer');
+      const raised = Number(c.raised_amount) || 0;
+      const target = Number(c.target_amount) || 1;
+      const pct = Math.min(100, Math.round((raised / target) * 100));
+      const remaining = Math.max(0, target - raised);
+      const donations = Array.isArray(c.donations) ? c.donations : [];
+
+      container.innerHTML = `
+        <div class="detail-card">
+          <div class="detail-header">
+            <div class="detail-avatar">❤️</div>
+            <div class="detail-title" style="flex: 1;">
+              <div style="display: flex; gap: 0.5rem; margin-bottom: 0.35rem; align-items: center; flex-wrap: wrap;">
+                <span class="badge-id">Campaign #${c.campaign_id}</span>
+                <span class="badge badge-category">${c.category || 'General'}</span>
+                <span class="badge badge-${String(c.status).toLowerCase()}">${c.status}</span>
+              </div>
+              <h3>${c.title}</h3>
+              <p>🏛️ Organized by: ${c.organization_name}</p>
+            </div>
+            <div class="btn-group">
+              <a href="insert.html?tab=donor&campaign_id=${c.campaign_id}" class="btn btn-primary">
+                💳 Donate to Cause
+              </a>
+              <a href="update.html?id=${c.campaign_id}" class="btn btn-secondary">
+                ✏️ Edit Campaign
+              </a>
+              <a href="delete.html?id=${c.campaign_id}" class="btn btn-danger">
+                🗑️ Delete
+              </a>
+            </div>
+          </div>
+
+          <!-- Progress Overview -->
+          <div class="progress-container" style="margin-bottom: 1.5rem;">
+            <div class="progress-header">
+              <span style="font-size: 0.95rem; font-weight: 700;">Fundraising Goal Progress: <strong>${pct}% Funded</strong></span>
+              <span style="color: #38bdf8; font-weight: 700;">${donations.length} Generous Donors</span>
+            </div>
+            <div class="progress-bar-bg" style="height: 12px;">
+              <div class="progress-bar-fill ${pct >= 100 ? 'completed' : ''}" style="width: ${pct}%;"></div>
+            </div>
+          </div>
+
+          <!-- Financial Metrics Grid -->
+          <div class="detail-info-grid">
+            <div class="detail-info-item">
+              <span>Target Funding Goal</span>
+              <strong style="color: var(--text-white);">${formatCurrency(target)}</strong>
+            </div>
+            <div class="detail-info-item">
+              <span>Total Funds Raised</span>
+              <strong style="color: #10b981;">${formatCurrency(raised)}</strong>
+            </div>
+            <div class="detail-info-item">
+              <span>Remaining Gap</span>
+              <strong style="color: #f59e0b;">${formatCurrency(remaining)}</strong>
+            </div>
+            <div class="detail-info-item">
+              <span>Launch Start Date</span>
+              <strong>${c.start_date || 'N/A'}</strong>
+            </div>
+            <div class="detail-info-item">
+              <span>Campaign End Date</span>
+              <strong>${c.end_date || 'N/A'}</strong>
+            </div>
+            <div class="detail-info-item">
+              <span>Database Status</span>
+              <strong style="color: #38bdf8;">${c.status}</strong>
+            </div>
+          </div>
+
+          <!-- Mission Statement & Description -->
+          <div style="background: rgba(15, 23, 42, 0.6); padding: 1.5rem; border-radius: var(--radius-lg); border: 1px solid var(--border-subtle); margin-bottom: 2rem;">
+            <h4 style="font-family: var(--font-heading); color: var(--text-white); margin-bottom: 0.5rem; font-size: 1.1rem;">
+              📖 Campaign Cause & Mission Description
+            </h4>
+            <p style="color: var(--text-muted); line-height: 1.65; font-size: 0.94rem;">
+              ${c.description || 'No extended description provided.'}
+            </p>
+          </div>
+
+          <!-- Donors Contributions Table -->
+          <div>
+            <div class="section-header" style="margin-bottom: 1rem;">
+              <h4 style="font-family: var(--font-heading); color: var(--text-white); font-size: 1.25rem;">
+                📜 Donor Contributions for this Campaign (${donations.length})
+              </h4>
+              <a href="insert.html?tab=donor&campaign_id=${c.campaign_id}" class="btn btn-secondary btn-sm">➕ Add Donation</a>
+            </div>
+
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Txn ID</th>
+                    <th>Donor Name</th>
+                    <th>Email Address</th>
+                    <th>Amount</th>
+                    <th>Payment Mode</th>
+                    <th>Date & Time</th>
+                    <th>Message</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${donations.length === 0 ? `
+                    <tr>
+                      <td colspan="7" style="text-align: center; padding: 2rem; color: var(--text-muted);">
+                        No donations recorded for this campaign yet. Be the first to contribute!
+                      </td>
+                    </tr>
+                  ` : donations.map(d => `
+                    <tr>
+                      <td><span class="badge-id">${d.transaction_id}</span></td>
+                      <td><strong>${d.donor_name}</strong></td>
+                      <td style="color: var(--text-muted); font-size: 0.85rem;">${d.donor_email}</td>
+                      <td><strong style="color: #10b981;">${formatCurrency(d.amount)}</strong></td>
+                      <td><span class="badge badge-payment">${d.payment_method || 'Online'}</span></td>
+                      <td style="color: var(--text-muted); font-size: 0.82rem;">${d.donation_date}</td>
+                      <td style="font-style: italic; color: var(--text-muted); max-width: 200px;">"${d.message || 'Support'}"</td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      populateDropdown();
+    });
+  </script>
+
+</body>
+</html>
+

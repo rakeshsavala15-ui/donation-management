@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Online Donation Management System - Manage Charitable Donations & Fundraising</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Top Navigation Bar -->
+  <nav class="navbar">
+    <div class="nav-container">
+      <a href="index.html" class="brand">
+        <div class="brand-icon">❤️</div>
+        <div class="brand-text">
+          <h1>Online Donation</h1>
+          <span>Management System</span>
+        </div>
+      </a>
+      <div class="nav-links">
+        <a href="index.html" class="nav-link active">🏠 Dashboard</a>
+        <a href="list.html" class="nav-link">📋 Campaigns</a>
+        <a href="listOne.html" class="nav-link">🔍 Lookup</a>
+        <a href="insert.html" class="nav-link">➕ Create / Donate</a>
+        <a href="update.html" class="nav-link">✏️ Update</a>
+        <a href="delete.html" class="nav-link">🗑️ Delete</a>
+        <a href="history.html" class="nav-link">📜 History</a>
+        <a href="admin.html" class="nav-link">📊 Admin Monitor</a>
+        <span class="nav-badge" id="dbStatusBadge">
+          <span class="pulse-dot" id="dbPulseDot"></span>
+          <span id="dbStatusText">Checking DB...</span>
+        </span>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content Wrapper -->
+  <main class="main-wrapper">
+
+    <!-- SECTION 1: Hero Card with Image -->
+    <section class="hero-card">
+      <div class="hero-content">
+        <div class="hero-tag">🌟 Global Philanthropy & Humanitarian Operations • 2026</div>
+        <h2 class="hero-title">
+          <span class="highlight">Online Donation</span> Management System
+        </h2>
+        <p class="hero-subtitle">
+          Manage charitable donations and fundraising campaigns seamlessly. Organizations can create campaigns, donors can contribute money and view their donation history, and admins can monitor fundraising progress in real time.
+        </p>
+        <div class="btn-group" style="margin-top: 0.5rem;">
+          <a href="list.html" class="btn btn-primary">📋 Explore Active Campaigns</a>
+          <a href="insert.html" class="btn btn-secondary">➕ Launch New Campaign</a>
+          <a href="insert.html?tab=donor" class="btn btn-accent">💳 Make a Donation</a>
+          <a href="admin.html" class="btn btn-secondary">📊 Admin Monitor</a>
+        </div>
+      </div>
+      <div class="hero-image-box">
+        <img src="images/hero_gym.jpg" 
+             alt="Charity and Humanitarian Support" 
+             class="hero-image"
+             onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1532629345422-7515f3d16bb9?auto=format&fit=crop&w=1200&q=80';">
+        <div class="hero-image-overlay"></div>
+      </div>
+    </section>
+
+    <!-- SECTION 2: Quick Stats Bar & Metrics -->
+    <section style="margin-bottom: 2.75rem;">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon emerald">💰</div>
+          <div class="stat-info">
+            <h3>Total Funds Raised</h3>
+            <p id="stat-total-raised">$0</p>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon sky">⚡</div>
+          <div class="stat-info">
+            <h3>Active Campaigns</h3>
+            <p id="stat-active-campaigns">0 Active</p>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon amber">👥</div>
+          <div class="stat-info">
+            <h3>Total Contributions</h3>
+            <p id="stat-total-donations">0 Donors</p>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon indigo">🗄️</div>
+          <div class="stat-info">
+            <h3>MySQL Database</h3>
+            <p id="stat-db-name">donation_mgmt</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section Visual Banner: Community Impact Showcase -->
+      <div class="section-image-banner">
+        <img src="images/members_roster.jpg" 
+             alt="Community Volunteers Distributing Aid"
+             onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?auto=format&fit=crop&w=1200&q=80';">
+        <div class="section-banner-overlay">
+          <div>
+            <h3>🤝 Transforming Compassion into Direct Global Impact</h3>
+            <p>100% transparent fundraising for child education, healthcare emergency relief, clean water, and hunger alleviation.</p>
+          </div>
+          <a href="list.html" class="btn btn-primary btn-sm">Browse All Causes →</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 3: Core CRUD Modules Grid -->
+    <section style="margin-bottom: 3.25rem;">
+      <div class="section-header">
+        <h3 class="section-title">⚡ Core System Modules</h3>
+        <span style="font-size: 0.88rem; color: var(--text-muted);">Complete Full-Stack CRUD Operations & Monitoring</span>
+      </div>
+
+      <div class="modules-grid">
+        <!-- 1. Campaigns Directory -->
+        <div class="module-card">
+          <div>
+            <div class="module-header">
+              <div class="module-icon-box" style="background: rgba(16, 185, 129, 0.15); color: #10b981;">📋</div>
+              <div class="module-title">
+                <h2>1. Campaigns Directory</h2>
+                <span>READ ALL (GET /campaigns)</span>
+              </div>
+            </div>
+            <p class="module-desc">
+              Browse all charitable campaigns with live financial progress bars, category filters (Education, Health, Food, Water), target goals, and inline action buttons.
+            </p>
+          </div>
+          <a href="list.html" class="btn btn-primary" style="width: 100%;">View All Campaigns →</a>
+        </div>
+
+        <!-- 2. Campaign Profile Lookup -->
+        <div class="module-card">
+          <div>
+            <div class="module-header">
+              <div class="module-icon-box" style="background: rgba(6, 182, 212, 0.15); color: #06b6d4;">🔍</div>
+              <div class="module-title">
+                <h2>2. Campaign & Donor Lookup</h2>
+                <span>READ ONE (GET /campaigns/:id)</span>
+              </div>
+            </div>
+            <p class="module-desc">
+              Query individual fundraising initiatives by Campaign ID or dropdown selector. Inspect target breakdowns, days remaining, and real-time donor contribution lists.
+            </p>
+          </div>
+          <a href="listOne.html" class="btn btn-secondary" style="width: 100%;">Search Campaign Record →</a>
+        </div>
+
+        <!-- 3. Launch Campaign (Organizations) -->
+        <div class="module-card">
+          <div>
+            <div class="module-header">
+              <div class="module-icon-box" style="background: rgba(139, 92, 246, 0.15); color: #8b5cf6;">🏛️</div>
+              <div class="module-title">
+                <h2>3. Create Campaign (Org)</h2>
+                <span>CREATE (POST /campaigns)</span>
+              </div>
+            </div>
+            <p class="module-desc">
+              Registered charitable organizations can launch new fundraising campaigns. Define cause title, funding goal ($), timeline dates, category, and mission statement.
+            </p>
+          </div>
+          <a href="insert.html?tab=org" class="btn btn-primary" style="width: 100%;">Launch New Campaign →</a>
+        </div>
+
+        <!-- 4. Contribute Money (Donors) -->
+        <div class="module-card">
+          <div>
+            <div class="module-header">
+              <div class="module-icon-box" style="background: rgba(16, 185, 129, 0.15); color: #10b981;">💳</div>
+              <div class="module-title">
+                <h2>4. Make a Donation (Donors)</h2>
+                <span>CREATE (POST /donations)</span>
+              </div>
+            </div>
+            <p class="module-desc">
+              Donors can contribute money to any active campaign using simulated instant payment methods. Automatically updates campaign funds and issues verified transaction receipts.
+            </p>
+          </div>
+          <a href="insert.html?tab=donor" class="btn btn-accent" style="width: 100%;">Donate to a Cause →</a>
+        </div>
+
+        <!-- 5. Update Campaign Details -->
+        <div class="module-card">
+          <div>
+            <div class="module-header">
+              <div class="module-icon-box" style="background: rgba(245, 158, 11, 0.15); color: #f59e0b;">✏️</div>
+              <div class="module-title">
+                <h2>5. Update Campaign Records</h2>
+                <span>UPDATE (PUT /campaigns/:id)</span>
+              </div>
+            </div>
+            <p class="module-desc">
+              Modify existing campaign targets, revise ending dates, update descriptions, or toggle status between Active, Completed, or Paused with instant MySQL database synchronization.
+            </p>
+          </div>
+          <a href="update.html" class="btn btn-secondary" style="width: 100%;">Edit Campaign Record →</a>
+        </div>
+
+        <!-- 6. Delete Campaign Record -->
+        <div class="module-card">
+          <div>
+            <div class="module-header">
+              <div class="module-icon-box" style="background: rgba(239, 68, 68, 0.15); color: #ef4444;">🗑️</div>
+              <div class="module-title">
+                <h2>6. Delete / Archive Campaign</h2>
+                <span>DELETE (DELETE /campaigns/:id)</span>
+              </div>
+            </div>
+            <p class="module-desc">
+              Safely archive or remove fundraising initiatives from MySQL. Features pre-deletion profile inspection and verification to safeguard historical donation audit trails.
+            </p>
+          </div>
+          <a href="delete.html" class="btn btn-danger" style="width: 100%;">Remove Campaign →</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 4: Featured Active Fundraising Campaigns -->
+    <section style="margin-bottom: 3.5rem;">
+      <div class="section-header">
+        <div>
+          <h3 class="section-title">🌟 Urgent & Featured Fundraising Campaigns</h3>
+          <p style="font-size: 0.88rem; color: var(--text-muted); margin-top: 0.25rem;">
+            Directly synced from MySQL table <code>campaigns</code>
+          </p>
+        </div>
+        <a href="list.html" class="btn btn-secondary btn-sm">View All in Directory →</a>
+      </div>
+
+      <div class="campaigns-grid" id="featuredCampaignsContainer">
+        <!-- Rendered dynamically via JavaScript -->
+        <div style="grid-column: 1 / -1; text-align: center; padding: 2.5rem; color: var(--text-muted);">
+          Loading active campaigns from database...
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 5: Recent Donor Contributions Activity -->
+    <section style="margin-bottom: 3.5rem;">
+      <div class="section-header">
+        <div>
+          <h3 class="section-title">📜 Recent Donations & Supporter Feed</h3>
+          <p style="font-size: 0.88rem; color: var(--text-muted); margin-top: 0.25rem;">
+            Real-time donation ledger from MySQL table <code>donations</code>
+          </p>
+        </div>
+        <a href="history.html" class="btn btn-secondary btn-sm">Full Donation History →</a>
+      </div>
+
+      <div class="table-container" style="padding: 1.25rem 1.5rem;">
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Transaction ID</th>
+                <th>Donor Name</th>
+                <th>Campaign Cause</th>
+                <th>Contribution</th>
+                <th>Payment Mode</th>
+                <th>Date & Time</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="recentDonationsBody">
+              <tr>
+                <td colspan="7" style="text-align: center; padding: 2rem; color: var(--text-muted);">
+                  Fetching recent donations from database...
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <div>
+        <strong>Online Donation Management System</strong> • FSD Mini Project (HTML, CSS, Express.js, MySQL)
+      </div>
+      <div>
+        Server: <code>http://localhost:3000</code> • Database: <code>donation_management</code>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Notification Toast Container -->
+  <div class="toast-box" id="toastBox"></div>
+
+  <script>
+    function formatCurrency(amount) {
+      return new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD',
+        maximumFractionDigits: 0
+      }).format(Number(amount) || 0);
+    }
+
+    function showToast(message, type = 'info') {
+      const box = document.getElementById('toastBox');
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      toast.innerText = message;
+      box.appendChild(toast);
+      setTimeout(() => toast.remove(), 3500);
+    }
+
+    // Check Database Connectivity
+    fetch('/db-status')
+      .then(res => res.json())
+      .then(data => {
+        const badge = document.getElementById('dbStatusBadge');
+        const text = document.getElementById('dbStatusText');
+        const pulse = document.getElementById('dbPulseDot');
+        const dbStat = document.getElementById('stat-db-name');
+
+        if (data.connected) {
+          text.innerText = 'MySQL Active';
+          dbStat.innerText = data.database;
+        } else {
+          badge.classList.add('demo-badge');
+          pulse.classList.add('amber');
+          text.innerText = 'Demo Store (Active)';
+          dbStat.innerText = 'In-Memory (Demo)';
+        }
+      })
+      .catch(() => {
+        document.getElementById('dbStatusText').innerText = 'Online Demo';
+      });
+
+    // Fetch Dashboard KPI Metrics from /admin/summary
+    fetch('/admin/summary')
+      .then(res => res.json())
+      .then(data => {
+        document.getElementById('stat-total-raised').innerText = formatCurrency(data.total_raised);
+        document.getElementById('stat-active-campaigns').innerText = `${data.active_campaigns} Active`;
+        document.getElementById('stat-total-donations').innerText = `${data.total_donations} Donors`;
+      })
+      .catch(err => {
+        console.error('Error fetching stats:', err);
+      });
+
+    // Fetch Featured Campaigns
+    fetch('/campaigns')
+      .then(res => res.json())
+      .then(campaigns => {
+        const container = document.getElementById('featuredCampaignsContainer');
+        const list = Array.isArray(campaigns) ? campaigns.slice(0, 3) : [];
+
+        if (list.length === 0) {
+          container.innerHTML = `<p style="grid-column: 1 / -1; text-align: center; color: var(--text-muted);">No active campaigns found. Please create one!</p>`;
+          return;
+        }
+
+        container.innerHTML = list.map(c => {
+          const raised = Number(c.raised_amount) || 0;
+          const target = Number(c.target_amount) || 1;
+          const pct = Math.min(100, Math.round((raised / target) * 100));
+
+          return `
+            <div class="campaign-card">
+              <div class="campaign-card-image-box">
+                <span class="badge badge-category campaign-card-badge">${c.category || 'General'}</span>
+                <span class="badge badge-${String(c.status).toLowerCase()} campaign-card-status">${c.status}</span>
+                <img src="${c.image_url || 'images/hero_gym.jpg'}" 
+                     alt="${c.title}"
+                     onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1532629345422-7515f3d16bb9?auto=format&fit=crop&w=800&q=80';">
+              </div>
+              <div class="campaign-card-body">
+                <div>
+                  <div class="campaign-org">🏛️ ${c.organization_name}</div>
+                  <h4 class="campaign-card-title">${c.title}</h4>
+                  <p class="campaign-card-desc">${c.description || 'Join hands to empower this charitable initiative.'}</p>
+                  
+                  <div class="progress-container">
+                    <div class="progress-header">
+                      <span>Funded: <strong>${pct}%</strong></span>
+                      <span style="color: var(--text-muted);">${c.donors_count || 0} Supporters</span>
+                    </div>
+                    <div class="progress-bar-bg">
+                      <div class="progress-bar-fill ${pct >= 100 ? 'completed' : ''}" style="width: ${pct}%;"></div>
+                    </div>
+                  </div>
+
+                  <div class="campaign-amounts">
+                    <div>
+                      <span style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-dim); display: block;">Raised</span>
+                      <strong class="campaign-raised">${formatCurrency(raised)}</strong>
+                    </div>
+                    <div style="text-align: right;">
+                      <span style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-dim); display: block;">Goal Target</span>
+                      <span class="campaign-target">${formatCurrency(target)}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="btn-group" style="margin-top: 1rem;">
+                  <a href="insert.html?tab=donor&campaign_id=${c.campaign_id}" class="btn btn-primary btn-sm" style="flex: 1;">
+                    💳 Donate Now
+                  </a>
+                  <a href="listOne.html?id=${c.campaign_id}" class="btn btn-secondary btn-sm">
+                    🔍 Details
+                  </a>
+                </div>
+              </div>
+            </div>
+          `;
+        }).join('');
+      })
+      .catch(err => {
+        document.getElementById('featuredCampaignsContainer').innerHTML = 
+          `<p style="grid-column: 1 / -1; text-align: center; color: var(--text-dim);">Unable to connect to campaigns API.</p>`;
+      });
+
+    // Fetch Recent Donations Feed
+    fetch('/donations')
+      .then(res => res.json())
+      .then(donations => {
+        const body = document.getElementById('recentDonationsBody');
+        const list = Array.isArray(donations) ? donations.slice(0, 5) : [];
+
+        if (list.length === 0) {
+          body.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--text-muted);">No donations recorded yet.</td></tr>`;
+          return;
+        }
+
+        body.innerHTML = list.map(d => `
+          <tr>
+            <td><span class="badge-id">${d.transaction_id}</span></td>
+            <td><strong>${d.donor_name}</strong></td>
+            <td>${d.campaign_title || 'General Cause'}</td>
+            <td><strong style="color: #10b981;">${formatCurrency(d.amount)}</strong></td>
+            <td><span class="badge badge-payment">${d.payment_method || 'Online'}</span></td>
+            <td style="color: var(--text-muted); font-size: 0.85rem;">${d.donation_date}</td>
+            <td><span class="badge badge-active">${d.payment_status}</span></td>
+          </tr>
+        `).join('');
+      })
+      .catch(() => {
+        document.getElementById('recentDonationsBody').innerHTML = 
+          `<tr><td colspan="7" style="text-align: center; color: var(--text-dim);">Unable to fetch recent donations.</td></tr>`;
+      });
+  </script>
+
+</body>
+</html>

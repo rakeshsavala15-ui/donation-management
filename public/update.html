@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Update Campaign - Online Donation Management System</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Top Navigation Bar -->
+  <nav class="navbar">
+    <div class="nav-container">
+      <a href="index.html" class="brand">
+        <div class="brand-icon">❤️</div>
+        <div class="brand-text">
+          <h1>Online Donation</h1>
+          <span>Management System</span>
+        </div>
+      </a>
+      <div class="nav-links">
+        <a href="index.html" class="nav-link">🏠 Dashboard</a>
+        <a href="list.html" class="nav-link">📋 Campaigns</a>
+        <a href="listOne.html" class="nav-link">🔍 Lookup</a>
+        <a href="insert.html" class="nav-link">➕ Create / Donate</a>
+        <a href="update.html" class="nav-link active">✏️ Update</a>
+        <a href="delete.html" class="nav-link">🗑️ Delete</a>
+        <a href="history.html" class="nav-link">📜 History</a>
+        <a href="admin.html" class="nav-link">📊 Admin Monitor</a>
+        <span class="nav-badge"><span class="pulse-dot"></span> MySQL Active</span>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content Wrapper -->
+  <main class="main-wrapper">
+
+    <!-- SECTION 1: Hero Card with Image -->
+    <section class="hero-card">
+      <div class="hero-content">
+        <div class="hero-tag">✏️ UPDATE Operation • PUT /campaigns/:id</div>
+        <h2 class="hero-title">Update <span class="highlight">Campaign Details</span></h2>
+        <p class="hero-subtitle">
+          Modify existing fundraising campaign parameters stored in MySQL. Fetch records by Campaign ID or dropdown selector, adjust financial goals, extend deadlines, toggle status between Active, Completed or Paused, and commit updates immediately.
+        </p>
+        <div class="btn-group" style="margin-top: 0.5rem;">
+          <a href="list.html" class="btn btn-secondary">📋 View Campaigns Directory</a>
+          <a href="listOne.html" class="btn btn-secondary">🔍 Campaign Lookup</a>
+        </div>
+      </div>
+      <div class="hero-image-box">
+        <img src="images/update_profile.jpg" 
+             alt="Campaign Revision" 
+             class="hero-image"
+             onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1517838277536-f5f99be501cd?auto=format&fit=crop&w=1200&q=80';">
+        <div class="hero-image-overlay"></div>
+      </div>
+    </section>
+
+    <!-- SECTION 2: Update Form Section with Side Image -->
+    <section class="form-with-image-grid" style="margin-bottom: 2.5rem;">
+      <!-- Update Form Card -->
+      <div class="form-card" style="margin-bottom: 0;">
+        <div class="form-header">
+          <h2>✏️ Edit Campaign Parameters</h2>
+          <p>Select a campaign from the dropdown or enter its Campaign ID to load current details.</p>
+        </div>
+
+        <!-- Option 1: Dropdown Selection -->
+        <div class="form-group" style="margin-bottom: 0.5rem;">
+          <label class="form-label" for="campaignSelect">
+            📋 Quick Select Campaign to Edit:
+          </label>
+          <div class="input-container">
+            <span class="input-icon">🎯</span>
+            <select id="campaignSelect" class="form-input" onchange="onSelectCampaignForUpdate(this.value)">
+              <option value="">-- Loading registered campaigns from database... --</option>
+            </select>
+          </div>
+          <span class="form-helper">💡 Pick any campaign to automatically populate its current information.</span>
+        </div>
+
+        <div class="search-divider">OR ENTER CAMPAIGN ID MANUALLY</div>
+
+        <!-- Option 2: Campaign ID with Fetch Helper -->
+        <div class="form-group">
+          <label class="form-label" for="campaign_id">Campaign ID to Update *</label>
+          <div style="display: flex; gap: 0.75rem;">
+            <div class="input-container" style="flex: 1;">
+              <span class="input-icon">🔢</span>
+              <input type="number" id="campaign_id" class="form-input" placeholder="e.g. 1" required>
+            </div>
+            <button type="button" onclick="fetchCampaignForUpdate()" class="btn btn-secondary" style="white-space: nowrap;">
+              🔍 Fetch Data
+            </button>
+          </div>
+        </div>
+
+        <form id="updateCampaignForm" onsubmit="saveCampaignUpdates(event)">
+          <!-- Field 1: Campaign Title -->
+          <div class="form-group">
+            <label class="form-label" for="update_title">Campaign Title *</label>
+            <div class="input-container">
+              <span class="input-icon">🎯</span>
+              <input type="text" id="update_title" class="form-input" required>
+            </div>
+          </div>
+
+          <!-- Field 2: Organization Name & Category -->
+          <div style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 1rem;">
+            <div class="form-group">
+              <label class="form-label" for="update_org">Organization Name *</label>
+              <div class="input-container">
+                <span class="input-icon">🏛️</span>
+                <input type="text" id="update_org" class="form-input" required>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="update_category">Category *</label>
+              <div class="input-container">
+                <span class="input-icon">🏷️</span>
+                <select id="update_category" class="form-input" required>
+                  <option value="Healthcare">Healthcare</option>
+                  <option value="Education">Education</option>
+                  <option value="Hunger Relief">Hunger Relief</option>
+                  <option value="Clean Water">Clean Water</option>
+                  <option value="Disaster Relief">Disaster Relief</option>
+                  <option value="Environment">Environment</option>
+                  <option value="General">General</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Field 3: Target Amount & Status -->
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div class="form-group">
+              <label class="form-label" for="update_target">Target Goal Amount ($) *</label>
+              <div class="input-container">
+                <span class="input-icon">💵</span>
+                <input type="number" id="update_target" class="form-input" min="10" step="10" required>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="update_status">Campaign Status *</label>
+              <div class="input-container">
+                <span class="input-icon">⚡</span>
+                <select id="update_status" class="form-input" required>
+                  <option value="Active">Active (Accepting Donations)</option>
+                  <option value="Completed">Completed (Goal Achieved)</option>
+                  <option value="Paused">Paused (Under Review)</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Field 4: End Date -->
+          <div class="form-group">
+            <label class="form-label" for="update_end_date">Target End Date *</label>
+            <div class="input-container">
+              <span class="input-icon">🏁</span>
+              <input type="date" id="update_end_date" class="form-input" required>
+            </div>
+          </div>
+
+          <!-- Field 5: Banner Image URL -->
+          <div class="form-group">
+            <label class="form-label" for="update_image">Banner Image URL</label>
+            <div class="input-container">
+              <span class="input-icon">🖼️</span>
+              <input type="url" id="update_image" class="form-input">
+            </div>
+          </div>
+
+          <!-- Field 6: Mission Description -->
+          <div class="form-group">
+            <label class="form-label" for="update_desc">Mission Description</label>
+            <textarea id="update_desc" class="form-input" rows="3"></textarea>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="btn-group" style="margin-top: 2rem;">
+            <button type="submit" id="btnSubmitUpdate" class="btn btn-primary" style="flex: 1;">
+              💾 Save Updates to MySQL
+            </button>
+            <button type="reset" class="btn btn-secondary">
+              🔄 Reset
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Side Card with Section Image -->
+      <div class="form-side-card">
+        <img src="images/hero_gym.jpg" 
+             alt="Campaign Update Operations" 
+             class="form-side-image"
+             onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?auto=format&fit=crop&w=1200&q=80';">
+        <div class="form-side-content">
+          <h4>Relational Integrity</h4>
+          <p>Updates executed through <code>PUT /campaigns/:id</code> preserve all historical donor contributions while refreshing the public fundraising goal.</p>
+          <ul class="form-side-list">
+            <li><span>✔️</span> Instant directory refresh</li>
+            <li><span>✔️</span> Real-time percentage re-computation</li>
+            <li><span>✔️</span> Seamless status transitions</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Navigation Interlinks -->
+    <div class="btn-group" style="margin-top: 2rem; justify-content: center;">
+      <a href="index.html" class="btn btn-secondary">← Back to Dashboard</a>
+      <a href="list.html" class="btn btn-secondary">📋 View All Campaigns</a>
+      <a href="listOne.html" class="btn btn-secondary">🔍 Lookup Record</a>
+      <a href="delete.html" class="btn btn-secondary">🗑️ Delete Campaign</a>
+    </div>
+
+  </main>
+
+  <!-- Notification Toast Container -->
+  <div class="toast-box" id="toastBox"></div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <div><strong>Online Donation Management</strong> • UPDATE Operation (<code>PUT /campaigns/:id</code>)</div>
+      <div>Target Table: <code>donation_management.campaigns</code></div>
+    </div>
+  </footer>
+
+  <script>
+    function showToast(message, type = 'info') {
+      const box = document.getElementById('toastBox');
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      toast.innerText = message;
+      box.appendChild(toast);
+      setTimeout(() => toast.remove(), 3500);
+    }
+
+    // Populate dropdown with all campaigns
+    function populateCampaignDropdown() {
+      fetch('/campaigns')
+        .then(res => res.json())
+        .then(list => {
+          const select = document.getElementById('campaignSelect');
+          if (!Array.isArray(list) || list.length === 0) {
+            select.innerHTML = '<option value="">-- No campaigns found --</option>';
+            return;
+          }
+
+          select.innerHTML = '<option value="">-- Choose a campaign to modify --</option>' +
+            list.map(c => `
+              <option value="${c.campaign_id}">#${c.campaign_id} - ${c.title} (${c.status})</option>
+            `).join('');
+
+          // If query param ?id=X exists, auto load
+          const urlParams = new URLSearchParams(window.location.search);
+          const paramId = urlParams.get('id');
+          if (paramId) {
+            select.value = paramId;
+            document.getElementById('campaign_id').value = paramId;
+            fetchCampaignForUpdate();
+          }
+        })
+        .catch(err => {
+          console.error("Error populating campaigns:", err);
+        });
+    }
+
+    function onSelectCampaignForUpdate(id) {
+      if (!id) return;
+      document.getElementById('campaign_id').value = id;
+      fetchCampaignForUpdate();
+    }
+
+    function fetchCampaignForUpdate() {
+      const id = document.getElementById('campaign_id').value.trim();
+      if (!id) {
+        showToast('Please enter or select a Campaign ID', 'error');
+        return;
+      }
+
+      fetch(`/campaigns/${id}`)
+        .then(res => {
+          if (!res.ok) throw new Error("Campaign not found.");
+          return res.json();
+        })
+        .then(c => {
+          document.getElementById('update_title').value = c.title || '';
+          document.getElementById('update_org').value = c.organization_name || '';
+          document.getElementById('update_category').value = c.category || 'General';
+          document.getElementById('update_target').value = c.target_amount || '';
+          document.getElementById('update_status').value = c.status || 'Active';
+          document.getElementById('update_end_date').value = c.end_date || '';
+          document.getElementById('update_image').value = c.image_url || '';
+          document.getElementById('update_desc').value = c.description || '';
+          showToast(`Loaded details for Campaign #${id}`, 'info');
+        })
+        .catch(err => {
+          showToast('Failed to fetch campaign: ' + err.message, 'error');
+        });
+    }
+
+    function saveCampaignUpdates(e) {
+      e.preventDefault();
+      const id = document.getElementById('campaign_id').value.trim();
+      if (!id) {
+        showToast('Please select a campaign first.', 'error');
+        return;
+      }
+
+      const title = document.getElementById('update_title').value.trim();
+      const organization_name = document.getElementById('update_org').value.trim();
+      const category = document.getElementById('update_category').value;
+      const target_amount = document.getElementById('update_target').value;
+      const status = document.getElementById('update_status').value;
+      const end_date = document.getElementById('update_end_date').value;
+      const image_url = document.getElementById('update_image').value.trim();
+      const description = document.getElementById('update_desc').value.trim();
+      const btn = document.getElementById('btnSubmitUpdate');
+
+      btn.disabled = true;
+      btn.innerText = '⏳ Committing updates to MySQL...';
+
+      fetch(`/campaigns/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title, organization_name, category, target_amount, status, end_date, image_url, description
+        })
+      })
+      .then(res => {
+        if (!res.ok) throw new Error("Error updating campaign.");
+        return res.json();
+      })
+      .then(result => {
+        showToast(result.message || 'Campaign updated successfully!', 'success');
+        setTimeout(() => {
+          window.location.href = `listOne.html?id=${id}`;
+        }, 1200);
+      })
+      .catch(err => {
+        showToast('Update error: ' + err.message, 'error');
+      })
+      .finally(() => {
+        btn.disabled = false;
+        btn.innerText = '💾 Save Updates to MySQL';
+      });
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      populateCampaignDropdown();
+    });
+  </script>
+
+</body>
+</html>
+

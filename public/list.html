@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Campaigns Directory - Online Donation Management System</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Top Navigation Bar -->
+  <nav class="navbar">
+    <div class="nav-container">
+      <a href="index.html" class="brand">
+        <div class="brand-icon">❤️</div>
+        <div class="brand-text">
+          <h1>Online Donation</h1>
+          <span>Management System</span>
+        </div>
+      </a>
+      <div class="nav-links">
+        <a href="index.html" class="nav-link">🏠 Dashboard</a>
+        <a href="list.html" class="nav-link active">📋 Campaigns</a>
+        <a href="listOne.html" class="nav-link">🔍 Lookup</a>
+        <a href="insert.html" class="nav-link">➕ Create / Donate</a>
+        <a href="update.html" class="nav-link">✏️ Update</a>
+        <a href="delete.html" class="nav-link">🗑️ Delete</a>
+        <a href="history.html" class="nav-link">📜 History</a>
+        <a href="admin.html" class="nav-link">📊 Admin Monitor</a>
+        <span class="nav-badge" id="dbStatusBadge">
+          <span class="pulse-dot"></span> MySQL Active
+        </span>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content Wrapper -->
+  <main class="main-wrapper">
+
+    <!-- SECTION 1: Hero Card with Image -->
+    <section class="hero-card">
+      <div class="hero-content">
+        <div class="hero-tag">📋 Live Database Records • GET /campaigns</div>
+        <h2 class="hero-title">Campaigns <span class="highlight">Fundraising Directory</span></h2>
+        <p class="hero-subtitle">
+          Real-time registry of all charitable fundraising campaigns retrieved directly from MySQL <code>campaigns</code> table. Filter by category, track target progress percentages, and initiate immediate donor contributions.
+        </p>
+        <div class="btn-group" style="margin-top: 0.5rem;">
+          <button onclick="loadCampaigns()" class="btn btn-primary">🔄 Refresh Directory</button>
+          <a href="insert.html?tab=org" class="btn btn-secondary">➕ Launch New Campaign</a>
+          <a href="insert.html?tab=donor" class="btn btn-accent">💳 Make a Donation</a>
+        </div>
+      </div>
+      <div class="hero-image-box">
+        <img src="images/members_roster.jpg" 
+             alt="Charity Campaigns Community" 
+             class="hero-image"
+             onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1559027615-cd4628902d4a?auto=format&fit=crop&w=1200&q=80';">
+        <div class="hero-image-overlay"></div>
+      </div>
+    </section>
+
+    <!-- SECTION 2: Filter Toolbar & Directory -->
+    <section>
+      <div class="table-container">
+        <div class="table-toolbar">
+          <div>
+            <h2 class="table-title">Registered Campaigns Registry</h2>
+            <span style="font-size: 0.85rem; color: var(--text-muted);" id="record-count">Loading campaigns...</span>
+          </div>
+
+          <div style="display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap;">
+            <!-- Category Filter -->
+            <select id="categoryFilter" onchange="filterData()" class="form-input" style="padding: 0.55rem 2rem 0.55rem 0.85rem; width: 160px; font-size: 0.875rem;">
+              <option value="ALL">All Categories</option>
+              <option value="Education">Education</option>
+              <option value="Healthcare">Healthcare</option>
+              <option value="Hunger Relief">Hunger Relief</option>
+              <option value="Clean Water">Clean Water</option>
+              <option value="Disaster Relief">Disaster Relief</option>
+              <option value="Environment">Environment</option>
+            </select>
+
+            <!-- Status Filter -->
+            <select id="statusFilter" onchange="filterData()" class="form-input" style="padding: 0.55rem 2rem 0.55rem 0.85rem; width: 140px; font-size: 0.875rem;">
+              <option value="ALL">All Status</option>
+              <option value="Active">Active</option>
+              <option value="Completed">Completed</option>
+              <option value="Paused">Paused</option>
+            </select>
+
+            <!-- Search Input -->
+            <input type="text" 
+                   id="tableSearchInput" 
+                   onkeyup="filterData()" 
+                   placeholder="Search by title, org or ID..." 
+                   class="form-input" 
+                   style="padding: 0.55rem 1rem 0.55rem 2.2rem; width: 240px; font-size: 0.875rem;">
+
+            <!-- View Mode Switch -->
+            <button onclick="toggleView('table')" id="btnViewTable" class="btn btn-secondary btn-sm" title="Table View">📑 Table</button>
+            <button onclick="toggleView('grid')" id="btnViewGrid" class="btn btn-secondary btn-sm" title="Cards View">🎴 Cards</button>
+          </div>
+        </div>
+
+        <!-- TABLE VIEW -->
+        <div class="table-responsive" id="tableViewContainer">
+          <table class="data-table" id="campaignsTable">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Campaign Title</th>
+                <th>Organization</th>
+                <th>Category</th>
+                <th>Goal Target</th>
+                <th>Amount Raised</th>
+                <th style="min-width: 140px;">Progress</th>
+                <th>Status</th>
+                <th style="text-align: right;">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="campaignsTableBody">
+              <tr>
+                <td colspan="9" style="text-align: center; padding: 2.5rem; color: var(--text-muted);">
+                  Fetching records from MySQL database...
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- GRID CARDS VIEW (Hidden by default) -->
+        <div class="campaigns-grid" id="gridViewContainer" style="display: none; margin-top: 1.5rem; margin-bottom: 0;"></div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- QUICK DONATE MODAL -->
+  <div class="modal-overlay" id="quickDonateModal">
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeQuickDonateModal()">✕</button>
+      <div class="form-header" style="margin-bottom: 1.25rem;">
+        <h2 style="font-size: 1.35rem;">💳 Contribute to Campaign</h2>
+        <p id="modalCampaignSubtitle">Empower this charitable mission with your donation.</p>
+      </div>
+
+      <form id="quickDonateForm" onsubmit="submitQuickDonation(event)">
+        <input type="hidden" id="modalCampaignId">
+
+        <div class="form-group">
+          <label class="form-label">Campaign Cause</label>
+          <input type="text" id="modalCampaignTitle" class="form-input" readonly style="opacity: 0.85; background: rgba(255,255,255,0.05); padding-left: 1rem;">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="modalDonorName">Your Full Name *</label>
+          <div class="input-container">
+            <span class="input-icon">👤</span>
+            <input type="text" id="modalDonorName" class="form-input" placeholder="e.g. Shiva Kumar" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="modalDonorEmail">Email Address (for Receipt) *</label>
+          <div class="input-container">
+            <span class="input-icon">✉️</span>
+            <input type="email" id="modalDonorEmail" class="form-input" placeholder="e.g. shiva@gmail.com" required>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+          <div class="form-group">
+            <label class="form-label" for="modalAmount">Donation Amount ($) *</label>
+            <div class="input-container">
+              <span class="input-icon">💵</span>
+              <input type="number" id="modalAmount" class="form-input" min="1" step="1" placeholder="100" required>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="modalPaymentMethod">Payment Mode</label>
+            <div class="input-container">
+              <span class="input-icon">💳</span>
+              <select id="modalPaymentMethod" class="form-input">
+                <option value="Credit Card">Credit Card</option>
+                <option value="UPI">UPI</option>
+                <option value="Net Banking">Net Banking</option>
+                <option value="Debit Card">Debit Card</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="modalMessage">Encouragement Message (Optional)</label>
+          <textarea id="modalMessage" class="form-input" rows="2" placeholder="Leave a kind note for the cause..."></textarea>
+        </div>
+
+        <div class="btn-group" style="margin-top: 1.5rem;">
+          <button type="submit" id="btnSubmitModal" class="btn btn-primary" style="flex: 1;">
+            ❤️ Complete Donation
+          </button>
+          <button type="button" class="btn btn-secondary" onclick="closeQuickDonateModal()">
+            Cancel
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Notification Toast Container -->
+  <div class="toast-box" id="toastBox"></div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <div><strong>Online Donation Management</strong> • READ Operation (<code>GET /campaigns</code>)</div>
+      <div>Source Table: <code>donation_management.campaigns</code></div>
+    </div>
+  </footer>
+
+  <script>
+    let allCampaigns = [];
+    let currentView = 'table';
+
+    function formatCurrency(amount) {
+      return new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD',
+        maximumFractionDigits: 0
+      }).format(Number(amount) || 0);
+    }
+
+    function showToast(message, type = 'info') {
+      const box = document.getElementById('toastBox');
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      toast.innerText = message;
+      box.appendChild(toast);
+      setTimeout(() => toast.remove(), 3500);
+    }
+
+    // Load campaigns from API
+    function loadCampaigns() {
+      const tbody = document.getElementById('campaignsTableBody');
+      tbody.innerHTML = `<tr><td colspan="9" style="text-align: center; padding: 2rem; color: var(--text-muted);">Fetching records from MySQL database...</td></tr>`;
+
+      fetch('/campaigns')
+        .then(res => {
+          if (!res.ok) throw new Error("HTTP error " + res.status);
+          return res.json();
+        })
+        .then(data => {
+          allCampaigns = Array.isArray(data) ? data : [];
+          document.getElementById('record-count').innerText = `${allCampaigns.length} campaigns listed`;
+          filterData();
+        })
+        .catch(err => {
+          console.error("Load campaigns error:", err);
+          tbody.innerHTML = `<tr><td colspan="9" style="text-align: center; color: var(--accent-rose); padding: 2rem;">Error loading campaigns: ${err.message}</td></tr>`;
+        });
+    }
+
+    function filterData() {
+      const search = document.getElementById('tableSearchInput').value.toLowerCase().trim();
+      const cat = document.getElementById('categoryFilter').value;
+      const status = document.getElementById('statusFilter').value;
+
+      const filtered = allCampaigns.filter(c => {
+        const matchesSearch = 
+          c.title.toLowerCase().includes(search) || 
+          c.organization_name.toLowerCase().includes(search) ||
+          String(c.campaign_id).includes(search);
+        
+        const matchesCategory = (cat === 'ALL' || c.category === cat);
+        const matchesStatus = (status === 'ALL' || c.status === status);
+
+        return matchesSearch && matchesCategory && matchesStatus;
+      });
+
+      renderTable(filtered);
+      renderGrid(filtered);
+      document.getElementById('record-count').innerText = `Showing ${filtered.length} of ${allCampaigns.length} campaigns`;
+    }
+
+    function renderTable(list) {
+      const tbody = document.getElementById('campaignsTableBody');
+      if (list.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="9" style="text-align: center; padding: 2.5rem; color: var(--text-muted);">No matching campaigns found.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = list.map(c => {
+        const raised = Number(c.raised_amount) || 0;
+        const target = Number(c.target_amount) || 1;
+        const pct = Math.min(100, Math.round((raised / target) * 100));
+
+        return `
+          <tr>
+            <td><span class="badge-id">#${c.campaign_id}</span></td>
+            <td>
+              <strong style="color: var(--text-white); font-size: 0.95rem;">${escapeHtml(c.title)}</strong>
+              <div style="font-size: 0.78rem; color: var(--text-dim); margin-top: 2px;">Ending: ${c.end_date}</div>
+            </td>
+            <td style="color: var(--accent-cyan); font-weight: 600;">${escapeHtml(c.organization_name)}</td>
+            <td><span class="badge badge-category">${escapeHtml(c.category || 'General')}</span></td>
+            <td style="font-weight: 700;">${formatCurrency(target)}</td>
+            <td style="font-weight: 800; color: #10b981;">${formatCurrency(raised)}</td>
+            <td>
+              <div class="progress-bar-bg" style="height: 8px;">
+                <div class="progress-bar-fill ${pct >= 100 ? 'completed' : ''}" style="width: ${pct}%;"></div>
+              </div>
+              <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 3px; display: flex; justify-content: space-between;">
+                <span>${pct}%</span>
+                <span>${c.donors_count || 0} donors</span>
+              </div>
+            </td>
+            <td>
+              <span class="badge badge-${String(c.status).toLowerCase()}">${c.status}</span>
+            </td>
+            <td style="text-align: right;">
+              <div class="btn-group" style="justify-content: flex-end; gap: 0.35rem;">
+                <button onclick="openQuickDonateModal(${c.campaign_id}, '${escapeQuote(c.title)}')" class="btn btn-primary btn-sm" title="Quick Donate">
+                  💳 Donate
+                </button>
+                <a href="listOne.html?id=${c.campaign_id}" class="btn btn-secondary btn-sm" title="Inspect Campaign">
+                  🔍 View
+                </a>
+                <a href="update.html?id=${c.campaign_id}" class="btn btn-secondary btn-sm" title="Edit Campaign Details">
+                  ✏️ Edit
+                </a>
+                <a href="delete.html?id=${c.campaign_id}" class="btn btn-danger btn-sm" title="Delete Campaign">
+                  🗑️
+                </a>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function renderGrid(list) {
+      const grid = document.getElementById('gridViewContainer');
+      if (list.length === 0) {
+        grid.innerHTML = `<p style="grid-column: 1 / -1; text-align: center; color: var(--text-muted);">No matching campaigns.</p>`;
+        return;
+      }
+
+      grid.innerHTML = list.map(c => {
+        const raised = Number(c.raised_amount) || 0;
+        const target = Number(c.target_amount) || 1;
+        const pct = Math.min(100, Math.round((raised / target) * 100));
+
+        return `
+          <div class="campaign-card">
+            <div class="campaign-card-image-box">
+              <span class="badge badge-category campaign-card-badge">${c.category || 'General'}</span>
+              <span class="badge badge-${String(c.status).toLowerCase()} campaign-card-status">${c.status}</span>
+              <img src="${c.image_url || 'images/hero_gym.jpg'}" 
+                   alt="${c.title}"
+                   onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1532629345422-7515f3d16bb9?auto=format&fit=crop&w=800&q=80';">
+            </div>
+            <div class="campaign-card-body">
+              <div>
+                <div class="campaign-org">🏛️ ${c.organization_name}</div>
+                <h4 class="campaign-card-title">${c.title}</h4>
+                <p class="campaign-card-desc">${c.description || 'Join hands with this mission.'}</p>
+                
+                <div class="progress-container">
+                  <div class="progress-header">
+                    <span>Funded: <strong>${pct}%</strong></span>
+                    <span style="color: var(--text-muted);">${c.donors_count || 0} Donors</span>
+                  </div>
+                  <div class="progress-bar-bg">
+                    <div class="progress-bar-fill ${pct >= 100 ? 'completed' : ''}" style="width: ${pct}%;"></div>
+                  </div>
+                </div>
+
+                <div class="campaign-amounts">
+                  <div>
+                    <span style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-dim); display: block;">Raised</span>
+                    <strong class="campaign-raised">${formatCurrency(raised)}</strong>
+                  </div>
+                  <div style="text-align: right;">
+                    <span style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-dim); display: block;">Goal Target</span>
+                    <span class="campaign-target">${formatCurrency(target)}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="btn-group" style="margin-top: 1rem;">
+                <button onclick="openQuickDonateModal(${c.campaign_id}, '${escapeQuote(c.title)}')" class="btn btn-primary btn-sm" style="flex: 1;">
+                  💳 Donate
+                </button>
+                <a href="listOne.html?id=${c.campaign_id}" class="btn btn-secondary btn-sm">
+                  🔍 View
+                </a>
+                <a href="update.html?id=${c.campaign_id}" class="btn btn-secondary btn-sm">
+                  ✏️ Edit
+                </a>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function toggleView(mode) {
+      currentView = mode;
+      const tableView = document.getElementById('tableViewContainer');
+      const gridView = document.getElementById('gridViewContainer');
+      const btnTable = document.getElementById('btnViewTable');
+      const btnGrid = document.getElementById('btnViewGrid');
+
+      if (mode === 'table') {
+        tableView.style.display = 'block';
+        gridView.style.display = 'none';
+        btnTable.classList.add('btn-primary');
+        btnTable.classList.remove('btn-secondary');
+        btnGrid.classList.remove('btn-primary');
+        btnGrid.classList.add('btn-secondary');
+      } else {
+        tableView.style.display = 'none';
+        gridView.style.display = 'grid';
+        btnGrid.classList.add('btn-primary');
+        btnGrid.classList.remove('btn-secondary');
+        btnTable.classList.remove('btn-primary');
+        btnTable.classList.add('btn-secondary');
+      }
+    }
+
+    function openQuickDonateModal(campaignId, title) {
+      document.getElementById('modalCampaignId').value = campaignId;
+      document.getElementById('modalCampaignTitle').value = title;
+      document.getElementById('modalCampaignSubtitle').innerText = `Direct contribution to: ${title}`;
+      document.getElementById('quickDonateModal').classList.add('active');
+    }
+
+    function closeQuickDonateModal() {
+      document.getElementById('quickDonateModal').classList.remove('active');
+      document.getElementById('quickDonateForm').reset();
+    }
+
+    function submitQuickDonation(e) {
+      e.preventDefault();
+      const campaign_id = document.getElementById('modalCampaignId').value;
+      const donor_name = document.getElementById('modalDonorName').value.trim();
+      const donor_email = document.getElementById('modalDonorEmail').value.trim();
+      const amount = document.getElementById('modalAmount').value;
+      const payment_method = document.getElementById('modalPaymentMethod').value;
+      const message = document.getElementById('modalMessage').value.trim();
+      const btn = document.getElementById('btnSubmitModal');
+
+      btn.disabled = true;
+      btn.innerText = '⏳ Processing...';
+
+      fetch('/donations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ campaign_id, donor_name, donor_email, amount, payment_method, message })
+      })
+      .then(res => res.json())
+      .then(data => {
+        closeQuickDonateModal();
+        showToast(data.message || 'Donation successful!', 'success');
+        loadCampaigns();
+      })
+      .catch(err => {
+        showToast('Error recording donation: ' + err.message, 'error');
+      })
+      .finally(() => {
+        btn.disabled = false;
+        btn.innerText = '❤️ Complete Donation';
+      });
+    }
+
+    function escapeHtml(text) {
+      if (!text) return '';
+      return String(text).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+    }
+
+    function escapeQuote(text) {
+      if (!text) return '';
+      return String(text).replace(/'/g, "\\'");
+    }
+
+    // Auto-load on page ready
+    window.addEventListener('DOMContentLoaded', () => {
+      loadCampaigns();
+      toggleView('table');
+    });
+  </script>
+
+</body>
+</html>
+

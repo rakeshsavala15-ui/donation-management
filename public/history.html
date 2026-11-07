@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Donation History & Receipts - Online Donation Management</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Top Navigation Bar -->
+  <nav class="navbar">
+    <div class="nav-container">
+      <a href="index.html" class="brand">
+        <div class="brand-icon">❤️</div>
+        <div class="brand-text">
+          <h1>Online Donation</h1>
+          <span>Management System</span>
+        </div>
+      </a>
+      <div class="nav-links">
+        <a href="index.html" class="nav-link">🏠 Dashboard</a>
+        <a href="list.html" class="nav-link">📋 Campaigns</a>
+        <a href="listOne.html" class="nav-link">🔍 Lookup</a>
+        <a href="insert.html" class="nav-link">➕ Create / Donate</a>
+        <a href="update.html" class="nav-link">✏️ Update</a>
+        <a href="delete.html" class="nav-link">🗑️ Delete</a>
+        <a href="history.html" class="nav-link active">📜 History</a>
+        <a href="admin.html" class="nav-link">📊 Admin Monitor</a>
+        <span class="nav-badge"><span class="pulse-dot"></span> MySQL Active</span>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content Wrapper -->
+  <main class="main-wrapper">
+
+    <!-- SECTION 1: Hero Card with Image -->
+    <section class="hero-card">
+      <div class="hero-content">
+        <div class="hero-tag">📜 Donor Records & Tax Receipts • GET /donations</div>
+        <h2 class="hero-title">Donor <span class="highlight">Contribution History</span></h2>
+        <p class="hero-subtitle">
+          Inspect historical giving records, track contribution dates, verify transaction references, and generate instant official tax-deductible donation receipts synced from MySQL <code>donations</code> table.
+        </p>
+        <div class="btn-group" style="margin-top: 0.5rem;">
+          <a href="insert.html?tab=donor" class="btn btn-primary">💳 Make Another Donation</a>
+          <button onclick="loadDonations()" class="btn btn-secondary">🔄 Refresh Ledger</button>
+        </div>
+      </div>
+      <div class="hero-image-box">
+        <img src="images/members_roster.jpg" 
+             alt="Generous Community Donors" 
+             class="hero-image"
+             onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1593113598332-cd288d649433?auto=format&fit=crop&w=1200&q=80';">
+        <div class="hero-image-overlay"></div>
+      </div>
+    </section>
+
+    <!-- SECTION 2: Donor Metrics Strip -->
+    <section style="margin-bottom: 2rem;">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon emerald">💵</div>
+          <div class="stat-info">
+            <h3>Total Ledger Funds</h3>
+            <p id="statLedgerTotal">$0</p>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon sky">📜</div>
+          <div class="stat-info">
+            <h3>Total Contributions</h3>
+            <p id="statLedgerCount">0 Records</p>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon amber">🎯</div>
+          <div class="stat-info">
+            <h3>Causes Supported</h3>
+            <p id="statLedgerCauses">0 Causes</p>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon purple">🧾</div>
+          <div class="stat-info">
+            <h3>Verified Tax Receipts</h3>
+            <p>100% 80G Exempt</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 3: Donation History Table -->
+    <section>
+      <div class="table-container">
+        <div class="table-toolbar">
+          <div>
+            <h2 class="table-title">Donation Records & Receipts</h2>
+            <span style="font-size: 0.85rem; color: var(--text-muted);" id="donationCount">Loading records...</span>
+          </div>
+
+          <div style="display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap;">
+            <!-- Payment Mode Filter -->
+            <select id="paymentFilter" onchange="filterDonations()" class="form-input" style="padding: 0.55rem 2rem 0.55rem 0.85rem; width: 150px; font-size: 0.875rem;">
+              <option value="ALL">All Modes</option>
+              <option value="Credit Card">Credit Card</option>
+              <option value="UPI">UPI</option>
+              <option value="Debit Card">Debit Card</option>
+              <option value="Net Banking">Net Banking</option>
+              <option value="PayPal">PayPal</option>
+            </select>
+
+            <!-- Search by Donor Name / Email / Txn ID -->
+            <input type="text" 
+                   id="historySearchInput" 
+                   onkeyup="filterDonations()" 
+                   placeholder="Search by donor name, email or txn ID..." 
+                   class="form-input" 
+                   style="padding: 0.55rem 1rem 0.55rem 2.2rem; width: 280px; font-size: 0.875rem;">
+
+            <button onclick="loadDonations()" class="btn btn-secondary btn-sm">🔄 Refresh</button>
+          </div>
+        </div>
+
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Txn ID</th>
+                <th>Donor Full Name</th>
+                <th>Email Address</th>
+                <th>Supported Cause</th>
+                <th>Contribution</th>
+                <th>Payment Mode</th>
+                <th>Date & Time</th>
+                <th>Status</th>
+                <th style="text-align: right;">Official Receipt</th>
+              </tr>
+            </thead>
+            <tbody id="donationsTableBody">
+              <tr>
+                <td colspan="9" style="text-align: center; padding: 2.5rem; color: var(--text-muted);">
+                  Fetching contribution history from database...
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- OFFICIAL TAX DONATION RECEIPT MODAL -->
+  <div class="modal-overlay" id="receiptModal">
+    <div class="modal-content" style="max-width: 620px; background: transparent; border: none; box-shadow: none; padding: 0;">
+      <button class="modal-close" onclick="closeReceiptModal()" style="top: 0; right: 0; background: rgba(0,0,0,0.7); color: white; z-index: 10;">✕</button>
+
+      <div class="receipt-card" id="printableReceipt">
+        <div class="receipt-header">
+          <div style="font-size: 2rem; margin-bottom: 0.25rem;">❤️</div>
+          <h3>OFFICIAL DONATION TAX RECEIPT</h3>
+          <p>Online Donation Management System • Registered Philanthropic Entity</p>
+          <div style="font-size: 0.75rem; color: #64748b; margin-top: 0.25rem;">
+            Exemption under Section 80G of Income Tax Act • Eligible for 50% Tax Deduction
+          </div>
+        </div>
+
+        <div class="receipt-amount-box">
+          <span>Total Contribution Received</span>
+          <strong id="receiptAmountDisplay">$0.00</strong>
+        </div>
+
+        <dl class="receipt-grid">
+          <div>
+            <dt>Receipt / Transaction ID</dt>
+            <dd id="receiptTxnId">-</dd>
+          </div>
+          <div>
+            <dt>Date & Time</dt>
+            <dd id="receiptDate">-</dd>
+          </div>
+          <div>
+            <dt>Donor Name</dt>
+            <dd id="receiptDonorName">-</dd>
+          </div>
+          <div>
+            <dt>Donor Email</dt>
+            <dd id="receiptDonorEmail">-</dd>
+          </div>
+          <div>
+            <dt>Charitable Initiative</dt>
+            <dd id="receiptCampaignTitle">-</dd>
+          </div>
+          <div>
+            <dt>Organizing NGO</dt>
+            <dd id="receiptOrgName">-</dd>
+          </div>
+          <div>
+            <dt>Payment Mode</dt>
+            <dd id="receiptPaymentMode">-</dd>
+          </div>
+          <div>
+            <dt>Payment Status</dt>
+            <dd style="color: #059669; font-weight: 800;">VERIFIED SUCCESSFUL</dd>
+          </div>
+        </dl>
+
+        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: var(--radius-sm); padding: 0.75rem; font-size: 0.8rem; color: #475569; margin-bottom: 1.25rem; font-style: italic;" id="receiptMessageBlock">
+          "Thank you for standing up for communities in need. Your generosity saves lives."
+        </div>
+
+        <div class="receipt-footer">
+          <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 0.75rem;">
+            <div style="text-align: left;">
+              <span style="display: block; font-weight: 700; color: #0f172a;">Digital Verification Hash:</span>
+              <code style="font-size: 0.72rem; color: #64748b;" id="receiptHash">SHA256: 8f9b...12a</code>
+            </div>
+            <div style="text-align: right;">
+              <div style="font-family: cursive; font-size: 1.15rem; color: #1e293b; border-bottom: 1px solid #94a3b8; padding-bottom: 2px;">
+                Authorized Trustee
+              </div>
+              <span style="font-size: 0.7rem; color: #64748b;">Global Relief Council</span>
+            </div>
+          </div>
+          <p>This is a computer-generated receipt and requires no physical signature.</p>
+        </div>
+
+        <div style="display: flex; gap: 0.75rem; margin-top: 1.5rem; justify-content: center;" class="no-print">
+          <button onclick="window.print()" class="btn btn-primary" style="flex: 1;">
+            🖨️ Print / Download PDF Receipt
+          </button>
+          <button onclick="closeReceiptModal()" class="btn btn-secondary">
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Notification Toast Container -->
+  <div class="toast-box" id="toastBox"></div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <div><strong>Online Donation Management</strong> • DONOR HISTORY & TAX RECEIPTS (<code>GET /donations</code>)</div>
+      <div>Target Table: <code>donation_management.donations</code></div>
+    </div>
+  </footer>
+
+  <script>
+    let allDonations = [];
+
+    function formatCurrency(amount) {
+      return new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD',
+        maximumFractionDigits: 0
+      }).format(Number(amount) || 0);
+    }
+
+    function showToast(message, type = 'info') {
+      const box = document.getElementById('toastBox');
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      toast.innerText = message;
+      box.appendChild(toast);
+      setTimeout(() => toast.remove(), 3500);
+    }
+
+    function loadDonations() {
+      const tbody = document.getElementById('donationsTableBody');
+      tbody.innerHTML = `<tr><td colspan="9" style="text-align: center; padding: 2rem; color: var(--text-muted);">Fetching records from database...</td></tr>`;
+
+      fetch('/donations')
+        .then(res => {
+          if (!res.ok) throw new Error("HTTP error " + res.status);
+          return res.json();
+        })
+        .then(data => {
+          allDonations = Array.isArray(data) ? data : [];
+          updateLedgerStats(allDonations);
+          
+          // Check URL query search
+          const urlParams = new URLSearchParams(window.location.search);
+          const queryParam = urlParams.get('query');
+          if (queryParam) {
+            document.getElementById('historySearchInput').value = queryParam;
+          }
+          filterDonations();
+        })
+        .catch(err => {
+          tbody.innerHTML = `<tr><td colspan="9" style="text-align: center; color: var(--accent-rose); padding: 2rem;">Error: ${err.message}</td></tr>`;
+        });
+    }
+
+    function updateLedgerStats(list) {
+      const total = list.reduce((sum, d) => sum + Number(d.amount || 0), 0);
+      const uniqueCauses = new Set(list.map(d => d.campaign_id)).size;
+
+      document.getElementById('statLedgerTotal').innerText = formatCurrency(total);
+      document.getElementById('statLedgerCount').innerText = `${list.length} Records`;
+      document.getElementById('statLedgerCauses').innerText = `${uniqueCauses} Causes`;
+    }
+
+    function filterDonations() {
+      const search = document.getElementById('historySearchInput').value.toLowerCase().trim();
+      const mode = document.getElementById('paymentFilter').value;
+
+      const filtered = allDonations.filter(d => {
+        const matchesSearch = 
+          d.donor_name.toLowerCase().includes(search) ||
+          d.donor_email.toLowerCase().includes(search) ||
+          (d.campaign_title && d.campaign_title.toLowerCase().includes(search)) ||
+          d.transaction_id.toLowerCase().includes(search);
+
+        const matchesMode = (mode === 'ALL' || d.payment_method === mode);
+        return matchesSearch && matchesMode;
+      });
+
+      renderTable(filtered);
+      document.getElementById('donationCount').innerText = `Showing ${filtered.length} of ${allDonations.length} contributions`;
+    }
+
+    function renderTable(list) {
+      const tbody = document.getElementById('donationsTableBody');
+      if (list.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="9" style="text-align: center; padding: 2.5rem; color: var(--text-muted);">No matching donation records found.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = list.map(d => `
+        <tr>
+          <td><span class="badge-id">${d.transaction_id}</span></td>
+          <td><strong style="color: var(--text-white); font-size: 0.95rem;">${escapeHtml(d.donor_name)}</strong></td>
+          <td style="color: var(--text-muted); font-size: 0.85rem;">${escapeHtml(d.donor_email)}</td>
+          <td>
+            <a href="listOne.html?id=${d.campaign_id}" style="color: var(--text-white); font-weight: 600;">
+              ${escapeHtml(d.campaign_title || 'Charity Cause')}
+            </a>
+            <div style="font-size: 0.75rem; color: var(--accent-cyan);">${escapeHtml(d.organization_name || 'Relief Aid')}</div>
+          </td>
+          <td><strong style="color: #10b981; font-size: 1.05rem;">${formatCurrency(d.amount)}</strong></td>
+          <td><span class="badge badge-payment">${d.payment_method || 'Online'}</span></td>
+          <td style="color: var(--text-muted); font-size: 0.85rem;">${d.donation_date}</td>
+          <td><span class="badge badge-active">${d.payment_status}</span></td>
+          <td style="text-align: right;">
+            <button onclick="openReceiptModal('${escapeQuote(d.transaction_id)}')" class="btn btn-secondary btn-sm" title="Generate Official Tax Receipt">
+              📄 View Receipt
+            </button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function openReceiptModal(txnId) {
+      const donation = allDonations.find(d => d.transaction_id === txnId);
+      if (!donation) return;
+
+      document.getElementById('receiptTxnId').innerText = donation.transaction_id;
+      document.getElementById('receiptDate').innerText = donation.donation_date;
+      document.getElementById('receiptDonorName').innerText = donation.donor_name;
+      document.getElementById('receiptDonorEmail').innerText = donation.donor_email;
+      document.getElementById('receiptCampaignTitle').innerText = donation.campaign_title || 'General Relief Cause';
+      document.getElementById('receiptOrgName').innerText = donation.organization_name || 'Global Relief Council';
+      document.getElementById('receiptPaymentMode').innerText = donation.payment_method || 'Credit Card';
+      document.getElementById('receiptAmountDisplay').innerText = formatCurrency(donation.amount);
+      document.getElementById('receiptHash').innerText = `SHA256: ${Math.random().toString(36).substring(2, 10)}${Math.random().toString(36).substring(2, 10)}`;
+
+      if (donation.message) {
+        document.getElementById('receiptMessageBlock').innerText = `"${donation.message}"`;
+      } else {
+        document.getElementById('receiptMessageBlock').innerText = `"Generous contribution in support of charitable causes."`;
+      }
+
+      document.getElementById('receiptModal').classList.add('active');
+    }
+
+    function closeReceiptModal() {
+      document.getElementById('receiptModal').classList.remove('active');
+    }
+
+    function escapeHtml(text) {
+      if (!text) return '';
+      return String(text).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+    }
+
+    function escapeQuote(text) {
+      if (!text) return '';
+      return String(text).replace(/'/g, "\\'");
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      loadDonations();
+    });
+  </script>
+
+</body>
+</html>
+

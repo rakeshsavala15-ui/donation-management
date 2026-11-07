@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Delete Campaign - Online Donation Management System</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Top Navigation Bar -->
+  <nav class="navbar">
+    <div class="nav-container">
+      <a href="index.html" class="brand">
+        <div class="brand-icon">❤️</div>
+        <div class="brand-text">
+          <h1>Online Donation</h1>
+          <span>Management System</span>
+        </div>
+      </a>
+      <div class="nav-links">
+        <a href="index.html" class="nav-link">🏠 Dashboard</a>
+        <a href="list.html" class="nav-link">📋 Campaigns</a>
+        <a href="listOne.html" class="nav-link">🔍 Lookup</a>
+        <a href="insert.html" class="nav-link">➕ Create / Donate</a>
+        <a href="update.html" class="nav-link">✏️ Update</a>
+        <a href="delete.html" class="nav-link active">🗑️ Delete</a>
+        <a href="history.html" class="nav-link">📜 History</a>
+        <a href="admin.html" class="nav-link">📊 Admin Monitor</a>
+        <span class="nav-badge"><span class="pulse-dot"></span> MySQL Active</span>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content Wrapper -->
+  <main class="main-wrapper">
+
+    <!-- SECTION 1: Hero Card with Image -->
+    <section class="hero-card">
+      <div class="hero-content">
+        <div class="hero-tag" style="background: rgba(239, 68, 68, 0.15); color: #f87171; border-color: rgba(239, 68, 68, 0.3);">
+          ⚠️ Permanent Action • DELETE /campaigns/:id
+        </div>
+        <h2 class="hero-title">Delete <span class="highlight" style="background: linear-gradient(135deg, #ef4444 0%, #f97316 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Campaign Record</span></h2>
+        <p class="hero-subtitle">
+          Safely archive or remove fundraising initiatives from MySQL. Our two-step verification ensures you review the campaign's raised funding and donor count before permanently deleting the record.
+        </p>
+        <div class="btn-group" style="margin-top: 0.5rem;">
+          <a href="list.html" class="btn btn-secondary">📋 View Campaigns Directory</a>
+          <a href="index.html" class="btn btn-secondary">🏠 Back to Dashboard</a>
+        </div>
+      </div>
+      <div class="hero-image-box">
+        <img src="images/archive_records.jpg" 
+             alt="Campaign Archival & Verification" 
+             class="hero-image"
+             onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1574680096145-d05b474e2155?auto=format&fit=crop&w=1200&q=80';">
+        <div class="hero-image-overlay"></div>
+      </div>
+    </section>
+
+    <!-- SECTION 2: Delete Form Section with Side Inspection Image -->
+    <section class="form-with-image-grid" style="margin-bottom: 2.5rem;">
+      <!-- Delete Form Card -->
+      <div class="form-card" style="margin-bottom: 0; border-top: 4px solid var(--accent-rose);">
+        <div class="form-header">
+          <h2 style="color: var(--accent-rose);">🗑️ Remove Campaign File</h2>
+          <p>Select a campaign or enter its ID to inspect parameters before confirming deletion.</p>
+        </div>
+
+        <!-- Option 1: Dropdown Selection -->
+        <div class="form-group" style="margin-bottom: 0.5rem;">
+          <label class="form-label" for="campaignSelect">
+            📋 Select Campaign to Delete:
+          </label>
+          <div class="input-container">
+            <span class="input-icon">🎯</span>
+            <select id="campaignSelect" class="form-input" onchange="onSelectCampaignForDelete(this.value)">
+              <option value="">-- Loading registered campaigns from database... --</option>
+            </select>
+          </div>
+          <span class="form-helper">💡 Pick any campaign to inspect raised funds before confirming removal.</span>
+        </div>
+
+        <div class="search-divider">OR ENTER CAMPAIGN ID MANUALLY</div>
+
+        <!-- Option 2: Campaign ID Input -->
+        <div class="form-group">
+          <label class="form-label" for="campaign_id">Campaign ID to Delete *</label>
+          <div style="display: flex; gap: 0.75rem;">
+            <div class="input-container" style="flex: 1;">
+              <span class="input-icon">🔢</span>
+              <input type="number" id="campaign_id" class="form-input" placeholder="e.g. 1" required>
+            </div>
+            <button type="button" onclick="previewCampaignToDelete()" class="btn btn-secondary" style="white-space: nowrap;">
+              🔍 Verify Record
+            </button>
+          </div>
+        </div>
+
+        <!-- Step 2: Verification Preview Card (Hidden until ID loaded) -->
+        <div id="deletePreviewCard" style="display: none; margin-top: 1.5rem; background: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: var(--radius-lg); padding: 1.5rem;">
+          <h3 style="color: #f87171; font-size: 1.15rem; margin-bottom: 0.75rem;">
+            ⚠️ Confirm Campaign Removal
+          </h3>
+          <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1rem;">
+            You are about to permanently delete this fundraising initiative and its associated database relations from MySQL.
+          </p>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem; font-size: 0.88rem;">
+            <div>
+              <span style="color: var(--text-dim); display: block; font-size: 0.75rem;">CAMPAIGN TITLE</span>
+              <strong id="previewTitle" style="color: var(--text-white);">-</strong>
+            </div>
+            <div>
+              <span style="color: var(--text-dim); display: block; font-size: 0.75rem;">ORGANIZATION</span>
+              <strong id="previewOrg" style="color: var(--accent-cyan);">-</strong>
+            </div>
+            <div>
+              <span style="color: var(--text-dim); display: block; font-size: 0.75rem;">TARGET GOAL</span>
+              <strong id="previewTarget" style="color: var(--text-white);">-</strong>
+            </div>
+            <div>
+              <span style="color: var(--text-dim); display: block; font-size: 0.75rem;">AMOUNT RAISED</span>
+              <strong id="previewRaised" style="color: #10b981;">-</strong>
+            </div>
+          </div>
+
+          <button type="button" id="btnConfirmDelete" onclick="confirmDeleteCampaign()" class="btn btn-danger" style="width: 100%;">
+            🗑️ Yes, Delete This Campaign from MySQL
+          </button>
+        </div>
+      </div>
+
+      <!-- Side Card with Section Image -->
+      <div class="form-side-card">
+        <img src="images/archive_records.jpg" 
+             alt="Safe Record Management" 
+             class="form-side-image"
+             onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1574680096145-d05b474e2155?auto=format&fit=crop&w=1200&q=80';">
+        <div class="form-side-content">
+          <h4>Safe Data Archival</h4>
+          <p>The deletion process issues a verified <code>DELETE /campaigns/:id</code> query to maintain data hygiene while preventing accidental record loss.</p>
+          <ul class="form-side-list">
+            <li><span>✔️</span> Pre-deletion impact inspection</li>
+            <li><span>✔️</span> Immediate cascading removal</li>
+            <li><span>✔️</span> Instant directory refresh</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Navigation Interlinks -->
+    <div class="btn-group" style="margin-top: 2rem; justify-content: center;">
+      <a href="index.html" class="btn btn-secondary">← Back to Dashboard</a>
+      <a href="list.html" class="btn btn-secondary">📋 View All Campaigns</a>
+      <a href="listOne.html" class="btn btn-secondary">🔍 Lookup Campaign</a>
+      <a href="update.html" class="btn btn-secondary">✏️ Update Campaign</a>
+    </div>
+
+  </main>
+
+  <!-- Notification Toast Container -->
+  <div class="toast-box" id="toastBox"></div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <div><strong>Online Donation Management</strong> • DELETE Operation (<code>DELETE /campaigns/:id</code>)</div>
+      <div>Target Table: <code>donation_management.campaigns</code></div>
+    </div>
+  </footer>
+
+  <script>
+    function formatCurrency(amount) {
+      return new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD',
+        maximumFractionDigits: 0
+      }).format(Number(amount) || 0);
+    }
+
+    function showToast(message, type = 'info') {
+      const box = document.getElementById('toastBox');
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      toast.innerText = message;
+      box.appendChild(toast);
+      setTimeout(() => toast.remove(), 3500);
+    }
+
+    // Populate dropdown with all campaigns
+    function populateCampaignDropdown() {
+      fetch('/campaigns')
+        .then(res => res.json())
+        .then(list => {
+          const select = document.getElementById('campaignSelect');
+          if (!Array.isArray(list) || list.length === 0) {
+            select.innerHTML = '<option value="">-- No campaigns found --</option>';
+            return;
+          }
+
+          select.innerHTML = '<option value="">-- Choose a campaign to delete --</option>' +
+            list.map(c => `
+              <option value="${c.campaign_id}">#${c.campaign_id} - ${c.title} (${c.organization_name})</option>
+            `).join('');
+
+          // If query param ?id=X exists, auto preview
+          const urlParams = new URLSearchParams(window.location.search);
+          const paramId = urlParams.get('id');
+          if (paramId) {
+            select.value = paramId;
+            document.getElementById('campaign_id').value = paramId;
+            previewCampaignToDelete();
+          }
+        })
+        .catch(err => {
+          console.error("Error populating dropdown:", err);
+        });
+    }
+
+    function onSelectCampaignForDelete(id) {
+      if (!id) return;
+      document.getElementById('campaign_id').value = id;
+      previewCampaignToDelete();
+    }
+
+    function previewCampaignToDelete() {
+      const id = document.getElementById('campaign_id').value.trim();
+      const previewCard = document.getElementById('deletePreviewCard');
+
+      if (!id) {
+        showToast('Please enter or select a Campaign ID Number', 'error');
+        return;
+      }
+
+      fetch(`/campaigns/${id}`)
+        .then(res => {
+          if (!res.ok) throw new Error("Campaign record not found in database.");
+          return res.json();
+        })
+        .then(c => {
+          document.getElementById('previewTitle').innerText = c.title;
+          document.getElementById('previewOrg').innerText = c.organization_name;
+          document.getElementById('previewTarget').innerText = formatCurrency(c.target_amount);
+          document.getElementById('previewRaised').innerText = formatCurrency(c.raised_amount);
+          previewCard.style.display = 'block';
+          showToast(`Verified Campaign #${id}`, 'info');
+        })
+        .catch(err => {
+          previewCard.style.display = 'none';
+          showToast('Verification failed: ' + err.message, 'error');
+        });
+    }
+
+    function confirmDeleteCampaign() {
+      const id = document.getElementById('campaign_id').value.trim();
+      if (!id) return;
+
+      const btn = document.getElementById('btnConfirmDelete');
+      btn.disabled = true;
+      btn.innerText = '⏳ Deleting from MySQL...';
+
+      fetch(`/campaigns/${id}`, {
+        method: 'DELETE'
+      })
+      .then(res => {
+        if (!res.ok) throw new Error("Error deleting campaign.");
+        return res.json();
+      })
+      .then(result => {
+        showToast(result.message || 'Campaign deleted successfully!', 'success');
+        setTimeout(() => {
+          window.location.href = 'list.html';
+        }, 1200);
+      })
+      .catch(err => {
+        showToast('Delete error: ' + err.message, 'error');
+      })
+      .finally(() => {
+        btn.disabled = false;
+        btn.innerText = '🗑️ Yes, Delete This Campaign from MySQL';
+      });
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      populateCampaignDropdown();
+    });
+  </script>
+
+</body>
+</html>
+

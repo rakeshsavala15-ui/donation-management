@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Create Campaign & Make a Donation - Online Donation Management</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Top Navigation Bar -->
+  <nav class="navbar">
+    <div class="nav-container">
+      <a href="index.html" class="brand">
+        <div class="brand-icon">❤️</div>
+        <div class="brand-text">
+          <h1>Online Donation</h1>
+          <span>Management System</span>
+        </div>
+      </a>
+      <div class="nav-links">
+        <a href="index.html" class="nav-link">🏠 Dashboard</a>
+        <a href="list.html" class="nav-link">📋 Campaigns</a>
+        <a href="listOne.html" class="nav-link">🔍 Lookup</a>
+        <a href="insert.html" class="nav-link active">➕ Create / Donate</a>
+        <a href="update.html" class="nav-link">✏️ Update</a>
+        <a href="delete.html" class="nav-link">🗑️ Delete</a>
+        <a href="history.html" class="nav-link">📜 History</a>
+        <a href="admin.html" class="nav-link">📊 Admin Monitor</a>
+        <span class="nav-badge"><span class="pulse-dot"></span> MySQL Active</span>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content Wrapper -->
+  <main class="main-wrapper">
+
+    <!-- SECTION 1: Hero Card with Image -->
+    <section class="hero-card">
+      <div class="hero-content">
+        <div class="hero-tag">➕ CREATE Operations • POST /campaigns & POST /donations</div>
+        <h2 class="hero-title">Create <span class="highlight">Campaign & Donate</span></h2>
+        <p class="hero-subtitle">
+          Empowering both non-profit organizations to launch verified fundraising initiatives and compassionate donors to contribute securely. All records are instantly committed to the MySQL database.
+        </p>
+        <div class="btn-group" style="margin-top: 0.5rem;">
+          <a href="list.html" class="btn btn-secondary">📋 View Active Campaigns</a>
+          <a href="history.html" class="btn btn-secondary">📜 View Donation History</a>
+        </div>
+      </div>
+      <div class="hero-image-box">
+        <img src="images/register_desk.jpg" 
+             alt="Charity Registration & Giving" 
+             class="hero-image"
+             onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1540497077202-7c8a3999166f?auto=format&fit=crop&w=1200&q=80';">
+        <div class="hero-image-overlay"></div>
+      </div>
+    </section>
+
+    <!-- SECTION 2: Tab Switcher (Organization vs Donor) -->
+    <div class="tab-container">
+      <button class="tab-btn active" id="tabBtnOrg" onclick="switchTab('org')">
+        🏛️ Organization: Launch New Campaign
+      </button>
+      <button class="tab-btn" id="tabBtnDonor" onclick="switchTab('donor')">
+        💳 Donor: Make a Charitable Donation
+      </button>
+    </div>
+
+    <!-- SECTION 3: TAB 1 - ORGANIZATION: CREATE CAMPAIGN FORM -->
+    <section class="form-with-image-grid" id="sectionOrg" style="margin-bottom: 2.5rem;">
+      <div class="form-card" style="margin-bottom: 0;">
+        <div class="form-header">
+          <h2>🏛️ Launch Fundraising Campaign</h2>
+          <p>Please enter the campaign details to enroll the cause into MySQL table <code>campaigns</code>.</p>
+        </div>
+
+        <form id="createCampaignForm" onsubmit="submitCampaign(event)">
+          <!-- Field 1: Campaign Title -->
+          <div class="form-group">
+            <label class="form-label" for="campTitle">Campaign Cause Title *</label>
+            <div class="input-container">
+              <span class="input-icon">🎯</span>
+              <input type="text" id="campTitle" class="form-input" placeholder="e.g. Free Eye Screening & Glasses for Rural Seniors" required>
+            </div>
+            <span class="form-helper">Official title displayed across the fundraising directory.</span>
+          </div>
+
+          <!-- Field 2: Organization Name & Category -->
+          <div style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 1rem;">
+            <div class="form-group">
+              <label class="form-label" for="campOrg">Organization Name *</label>
+              <div class="input-container">
+                <span class="input-icon">🏛️</span>
+                <input type="text" id="campOrg" class="form-input" placeholder="e.g. Sight For All Foundation" required>
+              </div>
+              <span class="form-helper">Non-profit NGO or community institution.</span>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="campCategory">Category *</label>
+              <div class="input-container">
+                <span class="input-icon">🏷️</span>
+                <select id="campCategory" class="form-input" required>
+                  <option value="Healthcare">Healthcare</option>
+                  <option value="Education">Education</option>
+                  <option value="Hunger Relief">Hunger Relief</option>
+                  <option value="Clean Water">Clean Water</option>
+                  <option value="Disaster Relief">Disaster Relief</option>
+                  <option value="Environment">Environment</option>
+                  <option value="General">General Welfare</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Field 3: Target Amount ($) -->
+          <div class="form-group">
+            <label class="form-label" for="campTarget">Funding Target Goal ($ USD) *</label>
+            <div class="input-container">
+              <span class="input-icon">💵</span>
+              <input type="number" id="campTarget" class="form-input" min="10" step="10" placeholder="e.g. 35000" required>
+            </div>
+            <span class="form-helper">Total financial requirement to fulfill the charitable program.</span>
+          </div>
+
+          <!-- Field 4: Timeline Dates -->
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div class="form-group">
+              <label class="form-label" for="campStartDate">Campaign Start Date *</label>
+              <div class="input-container">
+                <span class="input-icon">📅</span>
+                <input type="date" id="campStartDate" class="form-input" required>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="campEndDate">Target Completion Date *</label>
+              <div class="input-container">
+                <span class="input-icon">🏁</span>
+                <input type="date" id="campEndDate" class="form-input" required>
+              </div>
+            </div>
+          </div>
+
+          <!-- Field 5: Campaign Image URL -->
+          <div class="form-group">
+            <label class="form-label" for="campImage">Banner Image URL (Optional)</label>
+            <div class="input-container">
+              <span class="input-icon">🖼️</span>
+              <input type="url" id="campImage" class="form-input" placeholder="https://images.unsplash.com/photo-...">
+            </div>
+            <span class="form-helper">Leave empty for automatic high-resolution photography banner.</span>
+          </div>
+
+          <!-- Field 6: Description -->
+          <div class="form-group">
+            <label class="form-label" for="campDesc">Mission Description & Plan *</label>
+            <textarea id="campDesc" class="form-input" rows="3" placeholder="Provide background on the cause, target beneficiaries, and allocation of donations..." required></textarea>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="btn-group" style="margin-top: 2rem;">
+            <button type="submit" id="btnSubmitCamp" class="btn btn-primary" style="flex: 1;">
+              💾 Launch Campaign to MySQL
+            </button>
+            <button type="reset" class="btn btn-secondary">
+              🔄 Reset Form
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Side Card with Guide -->
+      <div class="form-side-card">
+        <img src="images/update_profile.jpg" 
+             alt="Organization Verification" 
+             class="form-side-image"
+             onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1532629345422-7515f3d16bb9?auto=format&fit=crop&w=1200&q=80';">
+        <div class="form-side-content">
+          <h4>Organization Verification</h4>
+          <p>Upon submission, the new initiative is written directly to MySQL table <code>campaigns</code> with auto-increment ID.</p>
+          <ul class="form-side-list">
+            <li><span>✔️</span> Instant public directory inclusion</li>
+            <li><span>✔️</span> Real-time target progress tracking</li>
+            <li><span>✔️</span> Direct donor payment integration</li>
+            <li><span>✔️</span> Full admin audit log monitoring</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- SECTION 4: TAB 2 - DONOR: MAKE A DONATION FORM -->
+    <section class="form-with-image-grid" id="sectionDonor" style="display: none; margin-bottom: 2.5rem;">
+      <div class="form-card" style="margin-bottom: 0;">
+        <div class="form-header">
+          <h2>💳 Make a Charitable Contribution</h2>
+          <p>Contribute funds securely to any registered cause. Recorded in MySQL table <code>donations</code>.</p>
+        </div>
+
+        <form id="makeDonationForm" onsubmit="submitDonation(event)">
+          <!-- Field 1: Target Campaign Selection -->
+          <div class="form-group">
+            <label class="form-label" for="donorCampaignSelect">Select Charitable Campaign *</label>
+            <div class="input-container">
+              <span class="input-icon">🎯</span>
+              <select id="donorCampaignSelect" class="form-input" required>
+                <option value="">-- Loading active campaigns... --</option>
+              </select>
+            </div>
+            <span class="form-helper">Choose which cause your donation will directly sponsor.</span>
+          </div>
+
+          <!-- Field 2: Donor Full Name -->
+          <div class="form-group">
+            <label class="form-label" for="donorName">Donor Full Name *</label>
+            <div class="input-container">
+              <span class="input-icon">👤</span>
+              <input type="text" id="donorName" class="form-input" placeholder="e.g. Shiva Kumar" required>
+            </div>
+            <span class="form-helper">Name printed on your official tax-deductible donation receipt.</span>
+          </div>
+
+          <!-- Field 3: Email Address & Phone -->
+          <div style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 1rem;">
+            <div class="form-group">
+              <label class="form-label" for="donorEmail">Email Address (for Receipt) *</label>
+              <div class="input-container">
+                <span class="input-icon">✉️</span>
+                <input type="email" id="donorEmail" class="form-input" placeholder="e.g. shiva.kumar@gmail.com" required>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="donorPhone">Phone Number</label>
+              <div class="input-container">
+                <span class="input-icon">📞</span>
+                <input type="tel" id="donorPhone" class="form-input" placeholder="e.g. +91 98765 43210">
+              </div>
+            </div>
+          </div>
+
+          <!-- Field 4: Donation Amount & Payment Mode -->
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div class="form-group">
+              <label class="form-label" for="donorAmount">Donation Amount ($ USD) *</label>
+              <div class="input-container">
+                <span class="input-icon">💵</span>
+                <input type="number" id="donorAmount" class="form-input" min="1" step="1" placeholder="e.g. 250" required>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="donorPaymentMethod">Payment Mode *</label>
+              <div class="input-container">
+                <span class="input-icon">💳</span>
+                <select id="donorPaymentMethod" class="form-input" required>
+                  <option value="Credit Card">Credit Card</option>
+                  <option value="UPI">UPI Instant Pay</option>
+                  <option value="Debit Card">Debit Card</option>
+                  <option value="Net Banking">Net Banking</option>
+                  <option value="PayPal">PayPal</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Field 5: Dedication / Message -->
+          <div class="form-group">
+            <label class="form-label" for="donorMessage">Dedication / Words of Encouragement</label>
+            <textarea id="donorMessage" class="form-input" rows="2" placeholder="e.g. Wishing fast recovery and brighter days ahead!"></textarea>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="btn-group" style="margin-top: 2rem;">
+            <button type="submit" id="btnSubmitDonation" class="btn btn-primary" style="flex: 1;">
+              ❤️ Complete Donation to MySQL
+            </button>
+            <button type="reset" class="btn btn-secondary">
+              🔄 Reset Form
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Side Card with Tax & Security Notes -->
+      <div class="form-side-card">
+        <img src="images/hero_gym.jpg" 
+             alt="Secure Giving" 
+             class="form-side-image"
+             onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?auto=format&fit=crop&w=1200&q=80';">
+        <div class="form-side-content">
+          <h4>Verified Charitable Giving</h4>
+          <p>Every contribution is generated with an authentic transaction ID (e.g. <code>TXN-2026-XX</code>) committed to MySQL.</p>
+          <ul class="form-side-list">
+            <li><span>✔️</span> 100% Tax Deductible (80G Tax Exemption)</li>
+            <li><span>✔️</span> Instant Printable Donation Receipt</li>
+            <li><span>✔️</span> Automated Raised Progress Updates</li>
+            <li><span>✔️</span> Zero Hidden Administrative Fees</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Navigation Interlinks -->
+    <div class="btn-group" style="margin-top: 2rem; justify-content: center;">
+      <a href="index.html" class="btn btn-secondary">← Back to Dashboard</a>
+      <a href="list.html" class="btn btn-secondary">📋 View All Campaigns</a>
+      <a href="listOne.html" class="btn btn-secondary">🔍 Lookup Record</a>
+      <a href="history.html" class="btn btn-secondary">📜 Donor History</a>
+    </div>
+
+  </main>
+
+  <!-- Notification Toast Container -->
+  <div class="toast-box" id="toastBox"></div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <div><strong>Online Donation Management</strong> • CREATE Operations (<code>POST /campaigns</code> & <code>POST /donations</code>)</div>
+      <div>Target Tables: <code>donation_management.campaigns</code> & <code>donations</code></div>
+    </div>
+  </footer>
+
+  <script>
+    function showToast(message, type = 'info') {
+      const box = document.getElementById('toastBox');
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      toast.innerText = message;
+      box.appendChild(toast);
+      setTimeout(() => toast.remove(), 3500);
+    }
+
+    // Switch between Organization and Donor tabs
+    function switchTab(tab) {
+      const btnOrg = document.getElementById('tabBtnOrg');
+      const btnDonor = document.getElementById('tabBtnDonor');
+      const secOrg = document.getElementById('sectionOrg');
+      const secDonor = document.getElementById('sectionDonor');
+
+      if (tab === 'donor') {
+        btnDonor.classList.add('active');
+        btnOrg.classList.remove('active');
+        secDonor.style.display = 'grid';
+        secOrg.style.display = 'none';
+      } else {
+        btnOrg.classList.add('active');
+        btnDonor.classList.remove('active');
+        secOrg.style.display = 'grid';
+        secDonor.style.display = 'none';
+      }
+    }
+
+    // Populate active campaigns in donor tab dropdown
+    function loadCampaignsForDonor(preselectId) {
+      fetch('/campaigns')
+        .then(res => res.json())
+        .then(list => {
+          const select = document.getElementById('donorCampaignSelect');
+          if (!Array.isArray(list) || list.length === 0) {
+            select.innerHTML = '<option value="">-- No active campaigns available --</option>';
+            return;
+          }
+
+          select.innerHTML = '<option value="">-- Select a Cause to Support --</option>' +
+            list.map(c => `
+              <option value="${c.campaign_id}">#${c.campaign_id} - ${c.title} (${c.organization_name})</option>
+            `).join('');
+
+          if (preselectId) {
+            select.value = preselectId;
+          }
+        })
+        .catch(err => {
+          console.error("Error loading campaigns for donor dropdown:", err);
+        });
+    }
+
+    // Handle Organization Create Campaign Submission
+    function submitCampaign(e) {
+      e.preventDefault();
+      const title = document.getElementById('campTitle').value.trim();
+      const organization_name = document.getElementById('campOrg').value.trim();
+      const category = document.getElementById('campCategory').value;
+      const target_amount = document.getElementById('campTarget').value;
+      const start_date = document.getElementById('campStartDate').value;
+      const end_date = document.getElementById('campEndDate').value;
+      const image_url = document.getElementById('campImage').value.trim();
+      const description = document.getElementById('campDesc').value.trim();
+      const btn = document.getElementById('btnSubmitCamp');
+
+      if (!title || !organization_name || !target_amount || !start_date || !end_date) {
+        showToast('Please fill all required campaign fields.', 'error');
+        return;
+      }
+
+      btn.disabled = true;
+      btn.innerText = '⏳ Saving Campaign to MySQL...';
+
+      fetch('/campaigns', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title, organization_name, category, target_amount, start_date, end_date, image_url, description
+        })
+      })
+      .then(res => {
+        if (!res.ok) throw new Error("Server error creating campaign.");
+        return res.json();
+      })
+      .then(result => {
+        showToast(result.message || 'Campaign launched successfully!', 'success');
+        setTimeout(() => {
+          window.location.href = 'list.html';
+        }, 1200);
+      })
+      .catch(err => {
+        showToast('Error: ' + err.message, 'error');
+      })
+      .finally(() => {
+        btn.disabled = false;
+        btn.innerText = '💾 Launch Campaign to MySQL';
+      });
+    }
+
+    // Handle Donor Contribution Submission
+    function submitDonation(e) {
+      e.preventDefault();
+      const campaign_id = document.getElementById('donorCampaignSelect').value;
+      const donor_name = document.getElementById('donorName').value.trim();
+      const donor_email = document.getElementById('donorEmail').value.trim();
+      const donor_phone = document.getElementById('donorPhone').value.trim();
+      const amount = document.getElementById('donorAmount').value;
+      const payment_method = document.getElementById('donorPaymentMethod').value;
+      const message = document.getElementById('donorMessage').value.trim();
+      const btn = document.getElementById('btnSubmitDonation');
+
+      if (!campaign_id || !donor_name || !donor_email || !amount) {
+        showToast('Please complete all required donation fields.', 'error');
+        return;
+      }
+
+      btn.disabled = true;
+      btn.innerText = '⏳ Processing Contribution...';
+
+      fetch('/donations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          campaign_id, donor_name, donor_email, donor_phone, amount, payment_method, message
+        })
+      })
+      .then(res => {
+        if (!res.ok) throw new Error("Error recording contribution.");
+        return res.json();
+      })
+      .then(result => {
+        showToast(result.message || 'Thank you! Your donation was recorded.', 'success');
+        setTimeout(() => {
+          window.location.href = `history.html?query=${encodeURIComponent(donor_email)}`;
+        }, 1300);
+      })
+      .catch(err => {
+        showToast('Error: ' + err.message, 'error');
+      })
+      .finally(() => {
+        btn.disabled = false;
+        btn.innerText = '❤️ Complete Donation to MySQL';
+      });
+    }
+
+    // Set Default Dates and Handle URL Params on Page Load
+    window.addEventListener('DOMContentLoaded', () => {
+      const today = new Date().toISOString().split('T')[0];
+      const future = new Date(Date.now() + 60 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+      document.getElementById('campStartDate').value = today;
+      document.getElementById('campEndDate').value = future;
+
+      const urlParams = new URLSearchParams(window.location.search);
+      const tabParam = urlParams.get('tab');
+      const campParam = urlParams.get('campaign_id');
+
+      loadCampaignsForDonor(campParam);
+
+      if (tabParam === 'donor' || campParam) {
+        switchTab('donor');
+      } else {
+        switchTab('org');
+      }
+    });
+  </script>
+
+</body>
+</html>
+
